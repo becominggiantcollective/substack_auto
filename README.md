@@ -81,6 +81,29 @@ PUBLISH_SCHEDULE=0 9,15,21 * * *
 
 ## Usage
 
+### Quick Start with CLI
+
+The easiest way to get started is using the built-in CLI:
+
+```bash
+# Run the interactive demo
+python cli.py demo
+
+# Set up your configuration
+python cli.py setup
+
+# Generate and publish one blog post
+python cli.py generate
+
+# Start the automated scheduler
+python cli.py schedule
+
+# Check system status
+python cli.py status
+```
+
+### Manual Usage
+
 ### Single Post Generation
 
 Generate and publish one blog post:
@@ -143,6 +166,8 @@ substack_auto/
 │   └── main.py                    # Main orchestrator
 ├── tests/
 │   └── test_substack_auto.py      # Test suite
+├── cli.py                         # Command-line interface
+├── demo.py                        # Interactive demonstration
 ├── generated_content/             # Output directory (created automatically)
 ├── requirements.txt               # Python dependencies
 ├── .env.example                   # Environment template
