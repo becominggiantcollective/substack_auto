@@ -79,6 +79,33 @@ PUBLISH_SCHEDULE=0 9,15,21 * * *
 - **VIDEO_DURATION**: Duration in seconds for generated videos
 - **PUBLISH_SCHEDULE**: Cron-style schedule for automated publishing
 
+### AI Content Shaping Options
+
+Customize how the AI generates content to match your brand voice and audience:
+
+- **CONTENT_TONE**: The tone of voice for content (e.g., "professional and engaging", "casual and humorous")
+- **TARGET_AUDIENCE**: Who the content is written for (e.g., "intelligent general audience", "beginner developers")
+- **CONTENT_STYLE**: The style of content (e.g., "informative and thought-provoking", "practical and actionable")  
+- **CUSTOM_INSTRUCTIONS**: Additional specific instructions for AI content generation
+
+#### Example Configurations
+
+**Tech Blog for Beginners:**
+```env
+CONTENT_TONE=friendly and encouraging
+TARGET_AUDIENCE=coding beginners
+CONTENT_STYLE=step-by-step and practical
+CUSTOM_INSTRUCTIONS=Always include code examples and explain jargon
+```
+
+**Professional Business Blog:**
+```env
+CONTENT_TONE=professional and authoritative
+TARGET_AUDIENCE=business executives
+CONTENT_STYLE=strategic and insightful
+CUSTOM_INSTRUCTIONS=Focus on ROI and business impact
+```
+
 ## Usage
 
 ### Quick Start with CLI
