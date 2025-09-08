@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     image_style: str = Field("digital art,modern,professional", env="IMAGE_STYLE")
     video_duration: int = Field(30, env="VIDEO_DURATION")
     
+    # AI Prompt Customization Settings
+    content_tone: str = Field("professional and engaging", env="CONTENT_TONE")
+    target_audience: str = Field("intelligent general audience", env="TARGET_AUDIENCE")
+    content_style: str = Field("informative and thought-provoking", env="CONTENT_STYLE")
+    custom_instructions: str = Field("", env="CUSTOM_INSTRUCTIONS")
+    
     # Publishing Schedule
     publish_schedule: str = Field("0 9,15,21 * * *", env="PUBLISH_SCHEDULE")
     

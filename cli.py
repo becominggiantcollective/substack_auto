@@ -73,6 +73,12 @@ def setup_wizard():
     print("   - CONTENT_TOPICS: Comma-separated topics (default: technology,AI,innovation,science)")
     print("   - IMAGE_STYLE: Image generation style (default: digital art,modern,professional)")
     print()
+    print("🎨 AI Content Shaping Options:")
+    print("   - CONTENT_TONE: Tone of the content (default: professional and engaging)")
+    print("   - TARGET_AUDIENCE: Target audience (default: intelligent general audience)")
+    print("   - CONTENT_STYLE: Content style (default: informative and thought-provoking)")
+    print("   - CUSTOM_INSTRUCTIONS: Additional custom instructions for AI content generation")
+    print()
     print("💾 Save the .env file and run this command again to continue.")
 
 def run_demo():
