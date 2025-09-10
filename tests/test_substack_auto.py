@@ -48,6 +48,24 @@ class TestSettings(unittest.TestCase):
             settings = Settings()
             topics = settings.topics_list
             self.assertEqual(topics, ['AI', 'technology', 'science'])
+    
+    def test_content_shaping_settings(self):
+        """Test that content shaping settings are properly loaded."""
+        with patch.dict(os.environ, {
+            'OPENAI_API_KEY': 'test_key',
+            'SUBSTACK_EMAIL': 'test@example.com',
+            'SUBSTACK_PASSWORD': 'test_password',
+            'SUBSTACK_PUBLICATION': 'test_publication',
+            'CONTENT_TONE': 'casual and friendly',
+            'TARGET_AUDIENCE': 'developers and tech enthusiasts',
+            'CONTENT_STYLE': 'practical and actionable',
+            'CUSTOM_INSTRUCTIONS': 'Always include code examples where relevant'
+        }):
+            settings = Settings()
+            self.assertEqual(settings.content_tone, 'casual and friendly')
+            self.assertEqual(settings.target_audience, 'developers and tech enthusiasts')
+            self.assertEqual(settings.content_style, 'practical and actionable')
+            self.assertEqual(settings.custom_instructions, 'Always include code examples where relevant')
 
 
 class TestTextGenerator(unittest.TestCase):
@@ -105,6 +123,53 @@ class TestTextGenerator(unittest.TestCase):
         self.assertEqual(post["subtitle"], "A test subtitle")
         self.assertEqual(post["content"], "This is a test blog post content.")
         self.assertIn("word_count", post)
+    
+    @patch('content_generators.text_generator.OpenAI')
+    def test_generate_topic_with_custom_instructions(self, mock_openai):
+        """Test topic generation incorporates custom instructions."""
+        # Mock OpenAI response
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = "Custom AI Topic"
+        
+        mock_client = Mock()
+        mock_client.chat.completions.create.return_value = mock_response
+        mock_openai.return_value = mock_client
+        
+        # Test with custom settings
+        with patch.dict(os.environ, {
+            'OPENAI_API_KEY': 'test_key',
+            'SUBSTACK_EMAIL': 'test@example.com',
+            'SUBSTACK_PASSWORD': 'test_password',
+            'SUBSTACK_PUBLICATION': 'test_publication',
+            'CONTENT_TONE': 'casual and humorous',
+            'TARGET_AUDIENCE': 'beginner developers',
+            'CUSTOM_INSTRUCTIONS': 'Include practical examples'
+        }):
+            # Patch the settings to use the new environment variables
+            with patch('content_generators.text_generator.settings') as mock_settings:
+                from config.settings import Settings
+                test_settings = Settings()
+                mock_settings.topics_list = test_settings.topics_list
+                mock_settings.content_tone = test_settings.content_tone
+                mock_settings.target_audience = test_settings.target_audience
+                mock_settings.custom_instructions = test_settings.custom_instructions
+                
+                # Reinitialize text generator with custom settings
+                from content_generators.text_generator import TextGenerator
+                custom_generator = TextGenerator()
+                custom_generator.client = mock_client
+                
+                topic = custom_generator.generate_topic()
+                
+                # Verify the prompt includes custom instructions
+                call_args = mock_client.chat.completions.create.call_args
+                prompt_content = call_args[1]['messages'][0]['content']
+                
+                self.assertIn('beginner developers', prompt_content)
+                self.assertIn('casual and humorous', prompt_content)
+                self.assertIn('Include practical examples', prompt_content)
+                self.assertEqual(topic, "Custom AI Topic")
 
 
 class TestImageGenerator(unittest.TestCase):

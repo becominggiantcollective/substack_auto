@@ -26,13 +26,24 @@ class TextGenerator:
         base_topics = settings.topics_list
         selected_topic = random.choice(base_topics)
         
+        # Build custom instructions for topic generation
+        custom_guidance = []
+        if settings.target_audience:
+            custom_guidance.append(f"- Suitable for {settings.target_audience}")
+        if settings.content_tone:
+            custom_guidance.append(f"- Written in a {settings.content_tone} tone")
+        if settings.custom_instructions:
+            custom_guidance.append(f"- {settings.custom_instructions}")
+        
+        guidance_text = "\n        ".join(custom_guidance) if custom_guidance else "- Suitable for an intelligent audience"
+        
         prompt = f"""
         Generate a specific, engaging topic for a blog post about {selected_topic}.
         The topic should be:
         - Current and relevant
         - Thought-provoking
-        - Suitable for an intelligent audience
         - Not overly technical
+        {guidance_text}
         
         Return only the topic title, nothing else.
         """
@@ -54,6 +65,19 @@ class TextGenerator:
     def generate_blog_post(self, topic: str) -> Dict[str, str]:
         """Generate a complete blog post for the given topic."""
         
+        # Build custom requirements for blog post generation
+        custom_requirements = []
+        if settings.content_style:
+            custom_requirements.append(f"- {settings.content_style.title()}")
+        if settings.content_tone:
+            custom_requirements.append(f"- Written in a {settings.content_tone} tone")
+        if settings.target_audience:
+            custom_requirements.append(f"- Suitable for {settings.target_audience}")
+        if settings.custom_instructions:
+            custom_requirements.append(f"- {settings.custom_instructions}")
+        
+        requirements_text = "\n        ".join(custom_requirements) if custom_requirements else "- Informative and thought-provoking\n        - Written in an accessible but intelligent tone\n        - Suitable for a general but educated audience"
+        
         # Generate the main content
         content_prompt = f"""
         Write a comprehensive, engaging blog post about: "{topic}"
@@ -61,10 +85,8 @@ class TextGenerator:
         The blog post should be:
         - Well-structured with clear sections
         - Between 800-1200 words
-        - Informative and thought-provoking
-        - Written in an accessible but intelligent tone
         - Include practical insights or takeaways
-        - Suitable for a general but educated audience
+        {requirements_text}
         
         Format the response as a complete blog post with paragraphs.
         Do not include a title at the top - just the content.
@@ -74,6 +96,7 @@ class TextGenerator:
         subtitle_prompt = f"""
         Create a compelling subtitle or brief description (1-2 sentences) for a blog post titled: "{topic}"
         The subtitle should capture the essence of the post and entice readers.
+        {f"Write in a {settings.content_tone} tone" if settings.content_tone else ""}
         Return only the subtitle, nothing else.
         """
         
