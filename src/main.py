@@ -17,6 +17,7 @@ from content_generators.text_generator import TextGenerator
 from content_generators.image_generator import ImageGenerator
 from content_generators.video_generator import VideoGenerator
 from publishers.substack_publisher import SubstackPublisher
+from agents.fact_checker_agent import FactCheckerAgent
 from config.settings import settings
 
 # Set up logging
@@ -41,6 +42,7 @@ class ContentOrchestrator:
         self.image_generator = ImageGenerator()
         self.video_generator = VideoGenerator()
         self.publisher = SubstackPublisher()
+        self.fact_checker = FactCheckerAgent()
         
         # Ensure output directory exists
         os.makedirs(settings.output_dir, exist_ok=True)
@@ -96,6 +98,53 @@ class ContentOrchestrator:
             logger.error(f"Error generating complete content: {e}")
             raise
     
+    def fact_check_content(self, content: Dict[str, any]) -> Dict[str, any]:
+        """
+        Perform fact-checking on generated content.
+        
+        Args:
+            content: Content dictionary with post_data
+            
+        Returns:
+            Fact-checking report
+        """
+        try:
+            logger.info("Starting fact-checking on content...")
+            
+            title = content["post_data"]["title"]
+            article_content = content["post_data"]["content"]
+            
+            # Run fact-checking
+            fact_check_report = self.fact_checker.check_article(title, article_content)
+            
+            # Save fact-check report
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            report_file = os.path.join(settings.output_dir, f"fact_check_report_{timestamp}.json")
+            
+            with open(report_file, 'w') as f:
+                json.dump(fact_check_report, f, indent=2, default=str)
+            
+            logger.info(f"Fact-check report saved: {report_file}")
+            
+            # Also save text report
+            text_report = self.fact_checker.generate_report(fact_check_report, output_format="text")
+            text_report_file = os.path.join(settings.output_dir, f"fact_check_report_{timestamp}.txt")
+            
+            with open(text_report_file, 'w') as f:
+                f.write(text_report)
+            
+            logger.info(f"Text report saved: {text_report_file}")
+            logger.info(f"Fact-check status: {fact_check_report['overall_status']}")
+            
+            return fact_check_report
+            
+        except Exception as e:
+            logger.error(f"Error during fact-checking: {e}")
+            return {
+                "error": str(e),
+                "overall_status": "ERROR"
+            }
+    
     def publish_content(self, content: Dict[str, any]) -> Dict[str, any]:
         """Publish generated content to Substack."""
         try:
@@ -141,8 +190,16 @@ class ContentOrchestrator:
                 "error": str(e)
             }
     
-    def create_and_publish_post(self) -> Dict[str, any]:
-        """Complete workflow: generate and publish a blog post."""
+    def create_and_publish_post(self, enable_fact_check: bool = True) -> Dict[str, any]:
+        """
+        Complete workflow: generate and publish a blog post.
+        
+        Args:
+            enable_fact_check: Whether to run fact-checking on the content (default: True)
+        
+        Returns:
+            Dictionary with results including content, fact-check, and publish status
+        """
         try:
             # Check daily post limit
             today = datetime.now().date()
@@ -158,6 +215,16 @@ class ContentOrchestrator:
             # Generate content
             content = self.generate_complete_content()
             
+            # Perform fact-checking if enabled
+            fact_check_report = None
+            if enable_fact_check:
+                fact_check_report = self.fact_check_content(content)
+                
+                # Log fact-check warnings
+                if fact_check_report.get("overall_status") == "REVIEW_NEEDED":
+                    logger.warning("Content flagged for review by fact-checker")
+                    logger.warning(f"Recommendations: {fact_check_report.get('recommendations', [])}")
+            
             # Publish content
             publish_result = self.publish_content(content)
             
@@ -165,6 +232,7 @@ class ContentOrchestrator:
                 "content_generated": True,
                 "publish_result": publish_result,
                 "post_title": content["post_data"]["title"],
+                "fact_check": fact_check_report,
                 "timestamp": datetime.now().isoformat()
             }
             

@@ -18,6 +18,7 @@ from content_generators.image_generator import ImageGenerator
 from content_generators.video_generator import VideoGenerator
 from publishers.substack_publisher import SubstackPublisher
 from main import ContentOrchestrator
+from agents.fact_checker_agent import FactCheckerAgent
 
 
 class TestSettings(unittest.TestCase):
@@ -410,6 +411,235 @@ class TestIntegration(unittest.TestCase):
         }):
             orchestrator = ContentOrchestrator()
             self.assertTrue(os.path.exists(self.temp_dir))
+
+
+class TestFactCheckerAgent(unittest.TestCase):
+    """Test the fact-checker agent."""
+    
+    def setUp(self):
+        """Set up test environment."""
+        with patch.dict(os.environ, {
+            'OPENAI_API_KEY': 'test_key',
+            'SUBSTACK_EMAIL': 'test@example.com',
+            'SUBSTACK_PASSWORD': 'test_password',
+            'SUBSTACK_PUBLICATION': 'test_publication'
+        }):
+            self.fact_checker = FactCheckerAgent()
+    
+    @patch('agents.fact_checker_agent.OpenAI')
+    def test_extract_claims(self, mock_openai):
+        """Test claim extraction from content."""
+        # Mock OpenAI response
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = """
+CLAIM: AI adoption increased by 300% in 2024
+TYPE: statistic
+VERIFIABLE: yes
+---
+CLAIM: Machine learning is transforming industries
+TYPE: fact
+VERIFIABLE: yes
+"""
+        mock_client = Mock()
+        mock_client.chat.completions.create.return_value = mock_response
+        mock_openai.return_value = mock_client
+        
+        # Reinitialize with mocked client
+        with patch.dict(os.environ, {
+            'OPENAI_API_KEY': 'test_key',
+            'SUBSTACK_EMAIL': 'test@example.com',
+            'SUBSTACK_PASSWORD': 'test_password',
+            'SUBSTACK_PUBLICATION': 'test_publication'
+        }):
+            fact_checker = FactCheckerAgent()
+        
+        content = "AI adoption increased by 300% in 2024. Machine learning is transforming industries."
+        claims = fact_checker.extract_claims(content)
+        
+        self.assertIsInstance(claims, list)
+        self.assertGreaterEqual(len(claims), 0)
+    
+    @patch('agents.fact_checker_agent.OpenAI')
+    def test_validate_claim(self, mock_openai):
+        """Test claim validation."""
+        # Mock OpenAI response
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = """
+CONFIDENCE: 75
+ASSESSMENT: LIKELY_ACCURATE
+REASONING: This claim appears plausible based on industry trends
+SOURCES_NEEDED: yes
+SEO_POTENTIAL: high
+"""
+        mock_client = Mock()
+        mock_client.chat.completions.create.return_value = mock_response
+        mock_openai.return_value = mock_client
+        
+        # Reinitialize with mocked client
+        with patch.dict(os.environ, {
+            'OPENAI_API_KEY': 'test_key',
+            'SUBSTACK_EMAIL': 'test@example.com',
+            'SUBSTACK_PASSWORD': 'test_password',
+            'SUBSTACK_PUBLICATION': 'test_publication'
+        }):
+            fact_checker = FactCheckerAgent()
+        
+        claim = "AI adoption increased by 300% in 2024"
+        result = fact_checker.validate_claim(claim)
+        
+        self.assertIn("claim", result)
+        self.assertIn("confidence_score", result)
+        self.assertIn("assessment", result)
+        self.assertIn("seo_potential", result)
+        self.assertEqual(result["claim"], claim)
+    
+    def test_assess_seo_impact(self):
+        """Test SEO impact assessment."""
+        claims = [
+            {"seo_potential": "high", "confidence_score": 80},
+            {"seo_potential": "medium", "confidence_score": 70},
+            {"seo_potential": "low", "confidence_score": 60}
+        ]
+        
+        seo_analysis = self.fact_checker.assess_seo_impact(claims)
+        
+        self.assertIn("overall_score", seo_analysis)
+        self.assertIn("featured_snippet_potential", seo_analysis)
+        self.assertIn("recommendations", seo_analysis)
+        self.assertGreater(seo_analysis["overall_score"], 0)
+    
+    def test_assess_seo_impact_empty(self):
+        """Test SEO impact assessment with no claims."""
+        seo_analysis = self.fact_checker.assess_seo_impact([])
+        
+        self.assertEqual(seo_analysis["overall_score"], 0)
+        self.assertEqual(seo_analysis["featured_snippet_potential"], "low")
+        self.assertIsInstance(seo_analysis["recommendations"], list)
+    
+    @patch('agents.fact_checker_agent.OpenAI')
+    def test_check_article(self, mock_openai):
+        """Test complete article fact-checking."""
+        # Mock OpenAI responses for both extract_claims and validate_claim
+        extract_response = Mock()
+        extract_response.choices = [Mock()]
+        extract_response.choices[0].message.content = """
+CLAIM: AI adoption increased by 300%
+TYPE: statistic
+VERIFIABLE: yes
+"""
+        
+        validate_response = Mock()
+        validate_response.choices = [Mock()]
+        validate_response.choices[0].message.content = """
+CONFIDENCE: 75
+ASSESSMENT: LIKELY_ACCURATE
+REASONING: Plausible claim
+SOURCES_NEEDED: yes
+SEO_POTENTIAL: high
+"""
+        
+        mock_client = Mock()
+        mock_client.chat.completions.create.side_effect = [extract_response, validate_response]
+        mock_openai.return_value = mock_client
+        
+        # Reinitialize with mocked client
+        with patch.dict(os.environ, {
+            'OPENAI_API_KEY': 'test_key',
+            'SUBSTACK_EMAIL': 'test@example.com',
+            'SUBSTACK_PASSWORD': 'test_password',
+            'SUBSTACK_PUBLICATION': 'test_publication'
+        }):
+            fact_checker = FactCheckerAgent()
+        
+        title = "The Rise of AI"
+        content = "AI adoption increased by 300% in 2024."
+        
+        report = fact_checker.check_article(title, content)
+        
+        self.assertIn("article_title", report)
+        self.assertIn("overall_status", report)
+        self.assertIn("claims", report)
+        self.assertIn("seo_analysis", report)
+        self.assertIn("recommendations", report)
+        self.assertEqual(report["article_title"], title)
+    
+    @patch('agents.fact_checker_agent.OpenAI')
+    def test_generate_report_text(self, mock_openai):
+        """Test text report generation."""
+        # Mock client
+        mock_client = Mock()
+        mock_openai.return_value = mock_client
+        
+        # Reinitialize with mocked client
+        with patch.dict(os.environ, {
+            'OPENAI_API_KEY': 'test_key',
+            'SUBSTACK_EMAIL': 'test@example.com',
+            'SUBSTACK_PASSWORD': 'test_password',
+            'SUBSTACK_PUBLICATION': 'test_publication'
+        }):
+            fact_checker = FactCheckerAgent()
+        
+        check_result = {
+            "article_title": "Test Article",
+            "analysis_timestamp": "2024-01-01T00:00:00",
+            "overall_status": "PASS",
+            "claims_extracted": 5,
+            "claims_validated": 5,
+            "flagged_claims_count": 0,
+            "average_confidence": 85.0,
+            "seo_analysis": {
+                "overall_score": 75,
+                "featured_snippet_potential": "high",
+                "high_seo_claims": 2
+            },
+            "recommendations": ["Great work!"]
+        }
+        
+        report = fact_checker.generate_report(check_result, output_format="text")
+        
+        self.assertIsInstance(report, str)
+        self.assertIn("FACT-CHECKER REPORT", report)
+        self.assertIn("Test Article", report)
+    
+    @patch('agents.fact_checker_agent.OpenAI')
+    def test_generate_report_markdown(self, mock_openai):
+        """Test markdown report generation."""
+        # Mock client
+        mock_client = Mock()
+        mock_openai.return_value = mock_client
+        
+        # Reinitialize with mocked client
+        with patch.dict(os.environ, {
+            'OPENAI_API_KEY': 'test_key',
+            'SUBSTACK_EMAIL': 'test@example.com',
+            'SUBSTACK_PASSWORD': 'test_password',
+            'SUBSTACK_PUBLICATION': 'test_publication'
+        }):
+            fact_checker = FactCheckerAgent()
+        
+        check_result = {
+            "article_title": "Test Article",
+            "analysis_timestamp": "2024-01-01T00:00:00",
+            "overall_status": "PASS",
+            "claims_extracted": 5,
+            "claims_validated": 5,
+            "flagged_claims_count": 0,
+            "average_confidence": 85.0,
+            "seo_analysis": {
+                "overall_score": 75,
+                "featured_snippet_potential": "high",
+                "high_seo_claims": 2
+            },
+            "recommendations": ["Great work!"]
+        }
+        
+        report = fact_checker.generate_report(check_result, output_format="markdown")
+        
+        self.assertIsInstance(report, str)
+        self.assertIn("# Fact-Checker Report", report)
+        self.assertIn("**Article:**", report)
 
 
 if __name__ == '__main__':
