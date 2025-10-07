@@ -7,6 +7,7 @@ An automated Substack system that creates and publishes blog entries, images, an
 - 🤖 **AI-Generated Content**: All content is created by AI agents with no human input
 - 📝 **Blog Post Generation**: Creates comprehensive, engaging blog posts on various topics
 - 🖼️ **Image Generation**: Generates featured images and thumbnails using DALL-E
+- 🎨 **Visual Director Agent**: SEO-optimized media generation with smart metadata
 - 🎥 **Video Creation**: Creates slideshow-style videos with title and content slides
 - 📅 **Automated Publishing**: Scheduled publishing to Substack with configurable frequency
 - 🔍 **Content Validation**: Ensures all published content is AI-generated only
@@ -164,6 +165,7 @@ The system is organized into several key components:
 - **TextGenerator**: Creates blog posts using GPT-4
 - **ImageGenerator**: Generates featured images using DALL-E 3
 - **VideoGenerator**: Creates slideshow videos from images and text
+- **VisualDirectorAgent**: SEO-optimized media generation with intelligent metadata
 
 ### Publishers
 
@@ -182,6 +184,8 @@ The system is organized into several key components:
 ```
 substack_auto/
 ├── src/
+│   ├── agents/
+│   │   └── visual_director_agent.py  # SEO-optimized media generation
 │   ├── content_generators/
 │   │   ├── text_generator.py      # AI text generation
 │   │   ├── image_generator.py     # AI image generation
@@ -191,10 +195,15 @@ substack_auto/
 │   ├── config/
 │   │   └── settings.py            # Configuration management
 │   └── main.py                    # Main orchestrator
+├── docs/
+│   ├── visual_director_agent.md   # Visual Director Agent docs
+│   └── seo_best_practices_media.md # SEO best practices
 ├── tests/
-│   └── test_substack_auto.py      # Test suite
+│   ├── test_substack_auto.py      # Test suite
+│   └── test_visual_director_agent.py # Visual Director tests
 ├── cli.py                         # Command-line interface
 ├── demo.py                        # Interactive demonstration
+├── examples_visual_director.py    # Visual Director examples
 ├── generated_content/             # Output directory (created automatically)
 ├── requirements.txt               # Python dependencies
 ├── .env.example                   # Environment template
@@ -207,9 +216,84 @@ substack_auto/
 1. **Topic Selection**: AI analyzes configured topics and current trends
 2. **Content Creation**: GPT-4 generates comprehensive blog posts
 3. **Image Generation**: DALL-E 3 creates relevant featured images
-4. **Video Production**: System creates slideshow videos with title and content slides
-5. **Content Validation**: Ensures all content meets AI-only requirements
-6. **Publishing**: Automated upload and publication to Substack
+4. **SEO Optimization**: Visual Director Agent adds metadata and SEO enhancements
+5. **Video Production**: System creates slideshow videos with title and content slides
+6. **Content Validation**: Ensures all content meets AI-only requirements
+7. **Publishing**: Automated upload and publication to Substack
+
+## Visual Director Agent
+
+The Visual Director Agent is an advanced feature that enhances image generation with SEO optimization:
+
+### Key Features
+
+- **SEO Analysis**: Extracts keywords, themes, and mood from article content
+- **Smart Filenames**: Generates SEO-friendly filenames (e.g., `ai-machine-learning-automation.png`)
+- **Alt Text Generation**: Creates accessible, SEO-optimized alt text (50-125 characters)
+- **Caption Creation**: Generates engaging captions for images
+- **Metadata Output**: Provides complete SEO data for publishing workflows
+
+### Basic Usage
+
+```python
+from agents.visual_director_agent import VisualDirectorAgent
+
+# Initialize the agent
+visual_director = VisualDirectorAgent()
+
+# Generate SEO-optimized image
+result = visual_director.generate_seo_optimized_image(
+    title="The Future of AI",
+    content="Article content...",
+    tags=["AI", "technology", "innovation"]
+)
+
+# Access results
+print(f"Image: {result['image_path']}")
+print(f"Alt text: {result['alt_text']}")
+print(f"Caption: {result['caption']}")
+print(f"Keywords: {result['keywords']}")
+```
+
+### Integration Example
+
+```python
+from agents.visual_director_agent import VisualDirectorAgent
+from content_generators.text_generator import TextGenerator
+
+# Generate content
+text_gen = TextGenerator()
+post_data = text_gen.create_complete_post()
+
+# Generate SEO-optimized featured image
+visual_director = VisualDirectorAgent()
+image_result = visual_director.generate_featured_image_with_seo(post_data)
+
+# Use in publishing
+publish_data = {
+    "title": post_data["title"],
+    "content": post_data["content"],
+    "image": image_result["image_path"],
+    "image_alt": image_result["alt_text"],
+    "image_caption": image_result["caption"]
+}
+```
+
+### Documentation
+
+For detailed documentation, see:
+- [Visual Director Agent Guide](docs/visual_director_agent.md)
+- [SEO Best Practices for Media](docs/seo_best_practices_media.md)
+- [Integration Examples](examples_visual_director.py)
+
+### SEO Benefits
+
+Using the Visual Director Agent provides:
+- **Better Search Visibility**: SEO-friendly filenames and alt text
+- **Improved Accessibility**: Descriptive alt text for screen readers
+- **Higher Engagement**: Compelling captions and relevant imagery
+- **Content Consistency**: Automated metadata generation
+- **Time Savings**: No manual SEO optimization needed
 
 ## AI-Only Content Validation
 
@@ -290,3 +374,6 @@ For issues and questions:
 - [ ] Integration with additional publishing platforms
 - [ ] Enhanced video generation with audio
 - [ ] Custom AI model fine-tuning capabilities
+- [x] Visual Director Agent for SEO-optimized media
+- [x] Comprehensive SEO metadata generation
+- [x] Automated alt-text and caption creation
