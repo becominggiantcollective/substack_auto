@@ -159,23 +159,42 @@ python src/main.py --status
 
 The system is organized into several key components:
 
-### Content Generators
+### Current Architecture
+
+#### Content Generators
 
 - **TextGenerator**: Creates blog posts using GPT-4
 - **ImageGenerator**: Generates featured images using DALL-E 3
 - **VideoGenerator**: Creates slideshow videos from images and text
 
-### Publishers
+#### Publishers
 
 - **SubstackPublisher**: Handles authentication and publishing to Substack
 
-### Configuration
+#### Configuration
 
 - **Settings**: Centralized configuration management using Pydantic
 
-### Orchestration
+#### Orchestration
 
 - **ContentOrchestrator**: Main coordinator that manages the complete workflow
+
+### Future Multi-Agent Architecture
+
+We're designing a transition to a sophisticated multi-agent system that will significantly enhance content quality and SEO optimization. See the [Multi-Agent Architecture Documentation](docs/MULTI_AGENT_ARCHITECTURE.md) for details on:
+
+- **Research Agent**: Topic discovery and keyword research
+- **Writer Agent**: Long-form content creation with SEO focus
+- **Editor Agent**: Content review and readability optimization
+- **SEO Agent**: Deep SEO optimization and metadata generation
+- **Visual Director Agent**: Image prompt design and media SEO
+- **Fact-Checker Agent**: Claim verification and snippet optimization
+- **Analytics Agent**: Performance tracking and insights
+
+For comprehensive architecture details, see:
+- [Multi-Agent Architecture Documentation](docs/MULTI_AGENT_ARCHITECTURE.md)
+- [Architecture Diagrams](docs/ARCHITECTURE_DIAGRAMS.md)
+- [Agent Context Examples](docs/AGENT_CONTEXT_EXAMPLES.json)
 
 ## Project Structure
 
@@ -284,9 +303,30 @@ For issues and questions:
 
 ## Roadmap
 
+### Phase 1: Foundation (Current)
+- [x] Basic content generation with AI
+- [x] Image and video generation
+- [x] Substack publishing integration
+- [x] Automated scheduling
+
+### Phase 2: Multi-Agent Architecture (In Design)
+- [ ] Implement base agent framework and communication protocol
+- [ ] Research Agent for keyword research and topic discovery
+- [ ] Writer Agent with SEO optimization
+- [ ] Editor Agent for content refinement
+- [ ] SEO Agent for comprehensive optimization
+- [ ] Visual Director Agent for media strategy
+- [ ] Fact-Checker Agent for verification
+- [ ] Analytics Agent for performance tracking
+
+### Phase 3: Advanced Features
 - [ ] Integration with additional AI models
 - [ ] Support for more content types (podcasts, newsletters)
 - [ ] Advanced analytics and performance tracking
-- [ ] Integration with additional publishing platforms
+- [ ] Integration with additional publishing platforms (Medium, WordPress)
 - [ ] Enhanced video generation with audio
 - [ ] Custom AI model fine-tuning capabilities
+- [ ] Social media automation
+- [ ] Content localization and translation
+
+See [Multi-Agent Architecture Documentation](docs/MULTI_AGENT_ARCHITECTURE.md) for detailed implementation roadmap.

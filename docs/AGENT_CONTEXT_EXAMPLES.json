@@ -1,0 +1,332 @@
+{
+  "description": "Example context objects for multi-agent workflow handoffs",
+  "version": "1.0",
+  "examples": [
+    {
+      "name": "Complete Workflow Context",
+      "description": "Full context object passed through entire workflow",
+      "context": {
+        "workflow_id": "wf_20240115_093045",
+        "created_at": "2024-01-15T09:00:00Z",
+        "updated_at": "2024-01-15T09:30:45Z",
+        "status": "in_progress",
+        "current_stage": "visual_creation",
+        "configuration": {
+          "content_topics": ["AI", "development", "productivity"],
+          "target_audience": "professional developers",
+          "content_tone": "professional and engaging",
+          "content_style": "informative and practical",
+          "max_word_count": 2000,
+          "target_readability": 70,
+          "brand_voice": "authoritative but accessible"
+        },
+        "research": {
+          "agent": "research_agent_v1",
+          "timestamp": "2024-01-15T09:05:00Z",
+          "topic": "The Future of AI-Powered Development Tools",
+          "primary_keyword": "AI development tools",
+          "secondary_keywords": ["AI code assistants", "automated coding", "developer AI"],
+          "search_intent": "informational",
+          "search_volume": 12000,
+          "keyword_difficulty": 45,
+          "competitor_gap": "lack of implementation examples",
+          "recommended_structure": {
+            "sections": ["Introduction", "Benefits", "Top Tools", "Implementation", "Future Trends"],
+            "target_word_count": 1500,
+            "suggested_media": 3
+          }
+        },
+        "content": {
+          "writer_agent": "writer_agent_v1",
+          "timestamp": "2024-01-15T09:15:00Z",
+          "title": "The Future of AI-Powered Development Tools: A Comprehensive Guide",
+          "subtitle": "How AI is revolutionizing software development in 2024",
+          "content": "# Introduction\n\nArtificial intelligence is fundamentally transforming how developers write, test, and deploy code...",
+          "word_count": 1542,
+          "keyword_usage": {
+            "AI development tools": 18,
+            "AI code assistants": 12,
+            "automated coding": 8
+          },
+          "structure": {
+            "headings": {
+              "h1": 1,
+              "h2": 5,
+              "h3": 8
+            },
+            "paragraphs": 23,
+            "lists": 4,
+            "code_blocks": 3
+          }
+        },
+        "editing": {
+          "editor_agent": "editor_agent_v1",
+          "timestamp": "2024-01-15T09:20:00Z",
+          "changes_made": 25,
+          "improvements": [
+            "Simplified technical jargon in introduction",
+            "Added transition phrases between sections",
+            "Broke long paragraphs into shorter ones",
+            "Improved call-to-action clarity"
+          ],
+          "readability": {
+            "flesch_reading_ease": 68,
+            "flesch_kincaid_grade": 8.5,
+            "avg_sentence_length": 15.2,
+            "avg_paragraph_length": 3.1
+          },
+          "quality_score": 92
+        },
+        "seo": {
+          "seo_agent": "seo_agent_v1",
+          "timestamp": "2024-01-15T09:25:00Z",
+          "metadata": {
+            "title_tag": "The Future of AI-Powered Development Tools | DevTech Blog",
+            "meta_description": "Discover how AI development tools are revolutionizing software creation. Learn about top AI code assistants, benefits, and implementation strategies for 2024.",
+            "url_slug": "ai-development-tools-future-guide",
+            "canonical_url": "https://devtech.blog/ai-development-tools-future-guide"
+          },
+          "open_graph": {
+            "og:title": "The Future of AI-Powered Development Tools",
+            "og:description": "How AI is revolutionizing software development in 2024",
+            "og:type": "article",
+            "og:image": "https://devtech.blog/images/ai-dev-tools-featured.jpg"
+          },
+          "structured_data": {
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": "The Future of AI-Powered Development Tools",
+            "author": {
+              "@type": "Organization",
+              "name": "DevTech Blog"
+            },
+            "datePublished": "2024-01-15T09:00:00Z",
+            "keywords": ["AI development tools", "AI code assistants", "automated coding"]
+          },
+          "seo_score": {
+            "overall": 87,
+            "keyword_optimization": 90,
+            "content_quality": 92,
+            "technical_seo": 85,
+            "user_experience": 82
+          }
+        },
+        "visual": {
+          "visual_director_agent": "visual_director_v1",
+          "timestamp": "2024-01-15T09:28:00Z",
+          "images": [
+            {
+              "type": "featured",
+              "prompt": "Modern illustration of AI-powered development tools with code and futuristic elements, digital art, professional tech aesthetic",
+              "alt_text": "AI development tools interface showing code assistance and automated features",
+              "file_name": "ai-development-tools-future-guide.png",
+              "dimensions": {
+                "width": 1920,
+                "height": 1080
+              }
+            }
+          ],
+          "video_thumbnail": {
+            "prompt": "Eye-catching thumbnail with bold text 'AI Dev Tools 2024'",
+            "alt_text": "Video thumbnail: The Future of AI Development Tools explained"
+          }
+        },
+        "fact_check": {
+          "fact_checker_agent": "fact_checker_v1",
+          "timestamp": "2024-01-15T09:30:00Z",
+          "claims_verified": 14,
+          "sources_added": 8,
+          "snippet_opportunities": 3,
+          "citations": [
+            {
+              "claim": "AI tools improve productivity by 40%",
+              "source": "GitHub Developer Survey 2023",
+              "url": "https://github.com/survey"
+            }
+          ],
+          "reliability_score": 95
+        },
+        "quality_gates": {
+          "research_approved": true,
+          "content_quality_approved": true,
+          "seo_approved": true,
+          "fact_check_approved": true,
+          "ready_for_publication": true
+        },
+        "errors": [],
+        "warnings": [
+          "Consider adding more code examples for technical audience"
+        ],
+        "performance_predictions": {
+          "estimated_ranking": "top 15",
+          "estimated_traffic": "500-800 monthly views",
+          "confidence": 0.75
+        }
+      }
+    },
+    {
+      "name": "Research Agent Output",
+      "description": "Context after Research Agent completion",
+      "context": {
+        "workflow_id": "wf_20240115_093045",
+        "current_agent": "research_agent",
+        "next_agent": "writer_agent",
+        "timestamp": "2024-01-15T09:05:00Z",
+        "research": {
+          "topic": "The Future of AI-Powered Development Tools",
+          "primary_keyword": "AI development tools",
+          "secondary_keywords": ["AI code assistants", "automated coding", "developer AI"],
+          "search_intent": "informational",
+          "search_volume": 12000,
+          "keyword_difficulty": 45,
+          "content_structure": {
+            "suggested_headings": ["Introduction", "Benefits", "Top Tools", "Implementation"],
+            "target_word_count": 1500,
+            "recommended_media": 3
+          }
+        },
+        "validation": {
+          "passed": true,
+          "score": 95
+        }
+      }
+    },
+    {
+      "name": "Writer to Editor Handoff",
+      "description": "Context passed from Writer Agent to Editor Agent",
+      "context": {
+        "workflow_id": "wf_20240115_093045",
+        "current_agent": "writer_agent",
+        "next_agent": "editor_agent",
+        "timestamp": "2024-01-15T09:15:00Z",
+        "research_context": {
+          "primary_keyword": "AI development tools",
+          "target_word_count": 1500
+        },
+        "content": {
+          "title": "The Future of AI-Powered Development Tools",
+          "subtitle": "How AI is revolutionizing software development",
+          "content": "# Introduction\n\nFull content here...",
+          "word_count": 1542,
+          "keyword_usage": {
+            "AI development tools": 18
+          }
+        },
+        "validation": {
+          "passed": true,
+          "score": 88
+        }
+      }
+    },
+    {
+      "name": "Error Context Example",
+      "description": "Context with validation failure requiring retry",
+      "context": {
+        "workflow_id": "wf_20240115_093045",
+        "current_agent": "writer_agent",
+        "status": "retry_required",
+        "timestamp": "2024-01-15T09:15:00Z",
+        "errors": [
+          {
+            "type": "content_quality",
+            "severity": "medium",
+            "message": "Content readability score below threshold",
+            "details": {
+              "current_score": 55,
+              "required_score": 60
+            },
+            "retry_count": 1
+          }
+        ],
+        "feedback": {
+          "instructions": "Simplify language and shorten sentences",
+          "focus_areas": ["sentence_length", "word_complexity"]
+        }
+      }
+    },
+    {
+      "name": "Parallel Processing Context",
+      "description": "Context for parallel execution of Visual Director and Fact-Checker",
+      "context": {
+        "workflow_id": "wf_20240115_093045",
+        "parallel_stage": true,
+        "agents": ["visual_director", "fact_checker"],
+        "timestamp": "2024-01-15T09:25:00Z",
+        "shared_input": {
+          "content": {
+            "title": "The Future of AI-Powered Development Tools",
+            "content": "Full content...",
+            "word_count": 1542
+          },
+          "seo_metadata": {
+            "primary_keyword": "AI development tools",
+            "secondary_keywords": ["AI code assistants"]
+          }
+        }
+      }
+    },
+    {
+      "name": "Quality Gate Validation",
+      "description": "Context at quality gate checkpoint",
+      "context": {
+        "workflow_id": "wf_20240115_093045",
+        "stage": "quality_gate",
+        "timestamp": "2024-01-15T09:30:00Z",
+        "validations": {
+          "research_quality": {
+            "passed": true,
+            "score": 95,
+            "criteria_met": ["has_keyword", "search_volume_ok", "structure_defined"]
+          },
+          "content_quality": {
+            "passed": true,
+            "score": 92,
+            "criteria_met": ["word_count", "readability", "structure"]
+          },
+          "seo_quality": {
+            "passed": true,
+            "score": 87,
+            "criteria_met": ["metadata", "structured_data", "og_tags"]
+          },
+          "fact_check": {
+            "passed": true,
+            "score": 95,
+            "criteria_met": ["claims_verified", "sources_added"]
+          }
+        },
+        "ready_for_publication": true
+      }
+    },
+    {
+      "name": "Analytics Agent Context",
+      "description": "Context for post-publication analytics tracking",
+      "context": {
+        "workflow_id": "wf_20240115_093045",
+        "agent": "analytics_agent",
+        "timestamp": "2024-01-15T10:00:00Z",
+        "publication_data": {
+          "post_id": "ai-dev-tools-2024",
+          "url": "https://yoursite.com/ai-development-tools-future",
+          "published_at": "2024-01-15T09:45:00Z"
+        },
+        "tracking_setup": {
+          "keywords_to_monitor": ["AI development tools", "AI code assistants"],
+          "competitors_to_track": ["competitor1.com", "competitor2.com"],
+          "metrics_to_collect": ["views", "engagement", "rankings", "backlinks"]
+        },
+        "initial_baseline": {
+          "timestamp": "2024-01-15T10:00:00Z",
+          "initial_position": null,
+          "impressions": 0
+        }
+      }
+    }
+  ],
+  "notes": [
+    "All timestamps follow ISO 8601 format",
+    "Workflow IDs use format: wf_YYYYMMDD_HHMMSS",
+    "Agent names follow snake_case convention",
+    "Scores are normalized to 0-100 scale",
+    "Context objects are extensible - agents can add custom fields"
+  ]
+}
