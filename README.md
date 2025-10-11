@@ -6,6 +6,7 @@ An automated Substack system that creates and publishes blog entries, images, an
 
 - 🤖 **AI-Generated Content**: All content is created by AI agents with no human input
 - 📝 **Blog Post Generation**: Creates comprehensive, engaging blog posts on various topics
+- ✍️ **Writer Agent**: SEO-optimized content generation with keyword integration and quality scoring
 - 🖼️ **Image Generation**: Generates featured images and thumbnails using DALL-E
 - 🎥 **Video Creation**: Creates slideshow-style videos with title and content slides
 - 📅 **Automated Publishing**: Scheduled publishing to Substack with configurable frequency
@@ -159,6 +160,10 @@ python src/main.py --status
 
 The system is organized into several key components:
 
+### Agents
+
+- **WriterAgent**: SEO-optimized content generation with keyword integration, meta data generation, and quality scoring ([Documentation](docs/writer_agent.md))
+
 ### Content Generators
 
 - **TextGenerator**: Creates blog posts using GPT-4
@@ -182,24 +187,32 @@ The system is organized into several key components:
 ```
 substack_auto/
 ├── src/
+│   ├── agents/
+│   │   ├── __init__.py
+│   │   └── writer_agent.py         # SEO-optimized content agent
 │   ├── content_generators/
-│   │   ├── text_generator.py      # AI text generation
-│   │   ├── image_generator.py     # AI image generation
-│   │   └── video_generator.py     # Video creation
+│   │   ├── text_generator.py       # AI text generation
+│   │   ├── image_generator.py      # AI image generation
+│   │   └── video_generator.py      # Video creation
 │   ├── publishers/
-│   │   └── substack_publisher.py  # Substack integration
+│   │   └── substack_publisher.py   # Substack integration
 │   ├── config/
-│   │   └── settings.py            # Configuration management
-│   └── main.py                    # Main orchestrator
+│   │   └── settings.py             # Configuration management
+│   └── main.py                     # Main orchestrator
 ├── tests/
-│   └── test_substack_auto.py      # Test suite
-├── cli.py                         # Command-line interface
-├── demo.py                        # Interactive demonstration
-├── generated_content/             # Output directory (created automatically)
-├── requirements.txt               # Python dependencies
-├── .env.example                   # Environment template
-├── .gitignore                     # Git ignore rules
-└── README.md                      # This file
+│   ├── test_substack_auto.py       # Test suite
+│   └── test_writer_agent.py        # Writer Agent tests
+├── docs/
+│   ├── README.md                   # Documentation index
+│   └── writer_agent.md             # Writer Agent documentation
+├── cli.py                          # Command-line interface
+├── demo.py                         # Interactive demonstration
+├── demo_writer_agent.py            # Writer Agent demo
+├── generated_content/              # Output directory (created automatically)
+├── requirements.txt                # Python dependencies
+├── .env.example                    # Environment template
+├── .gitignore                      # Git ignore rules
+└── README.md                       # This file
 ```
 
 ## Content Generation Process
@@ -231,8 +244,55 @@ python -m pytest tests/ -v
 Or run individual test modules:
 
 ```bash
-python tests/test_substack_auto.py
+# Run all tests
+python -m unittest discover -s tests -p "test_*.py" -v
+
+# Run Writer Agent tests
+python -m unittest tests.test_writer_agent -v
+
+# Run main system tests
+python -m unittest tests.test_substack_auto -v
 ```
+
+## Using the Writer Agent
+
+The Writer Agent provides advanced SEO-optimized content generation. For detailed documentation, see [Writer Agent Documentation](docs/writer_agent.md).
+
+### Quick Example
+
+```python
+from agents.writer_agent import WriterAgent
+
+# Initialize the agent
+writer = WriterAgent()
+
+# Generate SEO-optimized content
+result = writer.create_complete_content(
+    topic="The Future of AI in Healthcare",
+    keywords=["AI", "healthcare", "medical technology", "machine learning"],
+    research_summary="AI is revolutionizing healthcare through advanced diagnostics..."
+)
+
+# Access generated content
+print(f"Title: {result['title']}")
+print(f"Meta Title: {result['meta_title']}")
+print(f"Meta Description: {result['meta_description']}")
+print(f"Word Count: {result['word_count']}")
+print(f"SEO Score: {result['seo_score']}/100")
+print(f"Tags: {', '.join(result['tags'])}")
+```
+
+### Run Writer Agent Demo
+
+```bash
+python demo_writer_agent.py
+```
+
+This demonstrates:
+- Basic content generation workflow
+- Keyword density analysis
+- Content structure validation
+- SEO scoring calculation
 
 ## Monitoring and Logging
 
