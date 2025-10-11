@@ -7,6 +7,7 @@ An automated Substack system that creates and publishes blog entries, images, an
 - 🤖 **AI-Generated Content**: All content is created by AI agents with no human input
 - 📝 **Blog Post Generation**: Creates comprehensive, engaging blog posts on various topics
 - 🖼️ **Image Generation**: Generates featured images and thumbnails using DALL-E
+- 🎯 **SEO-Optimized Media**: Visual Director Agent generates images with SEO-friendly filenames, alt-text, and captions
 - 🎥 **Video Creation**: Creates slideshow-style videos with title and content slides
 - 📅 **Automated Publishing**: Scheduled publishing to Substack with configurable frequency
 - 🔍 **Content Validation**: Ensures all published content is AI-generated only
@@ -165,6 +166,10 @@ The system is organized into several key components:
 - **ImageGenerator**: Generates featured images using DALL-E 3
 - **VideoGenerator**: Creates slideshow videos from images and text
 
+### AI Agents
+
+- **VisualDirectorAgent**: Generates SEO-optimized media with intelligent keyword analysis and metadata generation
+
 ### Publishers
 
 - **SubstackPublisher**: Handles authentication and publishing to Substack
@@ -182,6 +187,8 @@ The system is organized into several key components:
 ```
 substack_auto/
 ├── src/
+│   ├── agents/
+│   │   └── visual_director_agent.py  # SEO-optimized media generation
 │   ├── content_generators/
 │   │   ├── text_generator.py      # AI text generation
 │   │   ├── image_generator.py     # AI image generation
@@ -192,9 +199,13 @@ substack_auto/
 │   │   └── settings.py            # Configuration management
 │   └── main.py                    # Main orchestrator
 ├── tests/
+│   ├── test_visual_director_agent.py  # Visual Director Agent tests
 │   └── test_substack_auto.py      # Test suite
+├── docs/
+│   └── visual_director_agent.md   # Visual Director Agent documentation
 ├── cli.py                         # Command-line interface
 ├── demo.py                        # Interactive demonstration
+├── example_visual_director.py     # Visual Director Agent examples
 ├── generated_content/             # Output directory (created automatically)
 ├── requirements.txt               # Python dependencies
 ├── .env.example                   # Environment template
