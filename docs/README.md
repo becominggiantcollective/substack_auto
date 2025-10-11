@@ -4,7 +4,14 @@ This directory contains comprehensive documentation for the Substack Auto projec
 
 ## Available Documentation
 
-### [Editor Agent](editor_agent.md)
+### [Editor Agent Quick Start](editor_agent_quickstart.md)
+Quick start guide for using the Editor Agent:
+- Basic usage
+- Common patterns
+- Integration examples
+- Quick reference
+
+### [Editor Agent Full Documentation](editor_agent.md)
 Complete documentation for the Editor Agent, including:
 - Overview and purpose
 - Key features and capabilities
@@ -18,7 +25,8 @@ Complete documentation for the Editor Agent, including:
 ## Quick Links
 
 - [Main README](../README.md) - Project overview and setup
-- [Editor Agent Documentation](editor_agent.md) - Content editing and SEO optimization
+- [Editor Agent Quick Start](editor_agent_quickstart.md) - Get started quickly
+- [Editor Agent Documentation](editor_agent.md) - Complete documentation
 
 ## Documentation Standards
 
