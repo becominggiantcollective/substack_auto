@@ -6,6 +6,7 @@ An automated Substack system that creates and publishes blog entries, images, an
 
 - 🤖 **AI-Generated Content**: All content is created by AI agents with no human input
 - 📝 **Blog Post Generation**: Creates comprehensive, engaging blog posts on various topics
+- ✍️ **Content Editing & SEO**: Editor Agent refines content for quality and SEO optimization
 - 🖼️ **Image Generation**: Generates featured images and thumbnails using DALL-E
 - 🎥 **Video Creation**: Creates slideshow-style videos with title and content slides
 - 📅 **Automated Publishing**: Scheduled publishing to Substack with configurable frequency
@@ -155,6 +156,22 @@ View current system status and statistics:
 python src/main.py --status
 ```
 
+### Editor Agent Examples
+
+Run interactive examples demonstrating the Editor Agent:
+
+```bash
+python examples_editor_agent.py
+```
+
+This will show:
+- Basic article editing
+- Integration with Writer Agent
+- Individual check functions
+- Detailed SEO reports
+
+For complete Editor Agent documentation, see [docs/editor_agent.md](docs/editor_agent.md).
+
 ## Architecture
 
 The system is organized into several key components:
@@ -164,6 +181,17 @@ The system is organized into several key components:
 - **TextGenerator**: Creates blog posts using GPT-4
 - **ImageGenerator**: Generates featured images using DALL-E 3
 - **VideoGenerator**: Creates slideshow videos from images and text
+
+### Agents
+
+- **EditorAgent**: Refines content for quality, grammar, tone, and SEO optimization
+  - Grammar and spelling checks
+  - Tone and style analysis
+  - Structure optimization
+  - SEO keyword integration
+  - Meta title and description generation
+  - Tag optimization
+  - Comprehensive SEO reports
 
 ### Publishers
 
@@ -186,15 +214,22 @@ substack_auto/
 │   │   ├── text_generator.py      # AI text generation
 │   │   ├── image_generator.py     # AI image generation
 │   │   └── video_generator.py     # Video creation
+│   ├── agents/
+│   │   └── editor_agent.py        # Content editing and SEO optimization
 │   ├── publishers/
 │   │   └── substack_publisher.py  # Substack integration
 │   ├── config/
 │   │   └── settings.py            # Configuration management
 │   └── main.py                    # Main orchestrator
+├── docs/
+│   ├── editor_agent.md            # Editor Agent documentation
+│   └── README.md                  # Documentation index
 ├── tests/
-│   └── test_substack_auto.py      # Test suite
+│   ├── test_substack_auto.py      # Main test suite
+│   └── test_editor_agent.py       # Editor Agent tests
 ├── cli.py                         # Command-line interface
 ├── demo.py                        # Interactive demonstration
+├── examples_editor_agent.py       # Editor Agent usage examples
 ├── generated_content/             # Output directory (created automatically)
 ├── requirements.txt               # Python dependencies
 ├── .env.example                   # Environment template
@@ -206,10 +241,11 @@ substack_auto/
 
 1. **Topic Selection**: AI analyzes configured topics and current trends
 2. **Content Creation**: GPT-4 generates comprehensive blog posts
-3. **Image Generation**: DALL-E 3 creates relevant featured images
-4. **Video Production**: System creates slideshow videos with title and content slides
-5. **Content Validation**: Ensures all content meets AI-only requirements
-6. **Publishing**: Automated upload and publication to Substack
+3. **Content Editing**: Editor Agent refines content for quality and SEO
+4. **Image Generation**: DALL-E 3 creates relevant featured images
+5. **Video Production**: System creates slideshow videos with title and content slides
+6. **Content Validation**: Ensures all content meets AI-only requirements
+7. **Publishing**: Automated upload and publication to Substack
 
 ## AI-Only Content Validation
 
@@ -231,8 +267,19 @@ python -m pytest tests/ -v
 Or run individual test modules:
 
 ```bash
+# Test main functionality
 python tests/test_substack_auto.py
+
+# Test Editor Agent
+python tests/test_editor_agent.py
 ```
+
+Test coverage includes:
+- Content generation (text, images, videos)
+- Editor Agent (grammar, SEO, quality checks)
+- Publishing workflow
+- Configuration management
+- Integration tests
 
 ## Monitoring and Logging
 
