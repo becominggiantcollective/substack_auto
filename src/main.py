@@ -17,6 +17,7 @@ from content_generators.text_generator import TextGenerator
 from content_generators.image_generator import ImageGenerator
 from content_generators.video_generator import VideoGenerator
 from publishers.substack_publisher import SubstackPublisher
+from agents.fact_checker_agent import FactCheckerAgent
 from config.settings import settings
 
 # Set up logging
@@ -41,6 +42,7 @@ class ContentOrchestrator:
         self.image_generator = ImageGenerator()
         self.video_generator = VideoGenerator()
         self.publisher = SubstackPublisher()
+        self.fact_checker = FactCheckerAgent()
         
         # Ensure output directory exists
         os.makedirs(settings.output_dir, exist_ok=True)
@@ -88,6 +90,17 @@ class ContentOrchestrator:
             
             # Save content metadata
             self._save_content_metadata(complete_content)
+            
+            # Fact-check content
+            logger.info("Running fact-check on generated content...")
+            fact_check_report = self.fact_checker.process(post_data)
+            complete_content["fact_check"] = fact_check_report
+            
+            # Log fact-check summary
+            summary = fact_check_report.get("summary", {})
+            logger.info(f"Fact-check: {summary.get('valid_claims', 0)}/{summary.get('total_claims_extracted', 0)} claims valid")
+            if summary.get("flagged_claims", 0) > 0:
+                logger.warning(f"Fact-check: {summary.get('flagged_claims', 0)} claims need review")
             
             logger.info("Complete content generation finished successfully")
             return complete_content

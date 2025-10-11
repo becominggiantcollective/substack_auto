@@ -10,6 +10,7 @@ An automated Substack system that creates and publishes blog entries, images, an
 - 🎥 **Video Creation**: Creates slideshow-style videos with title and content slides
 - 📅 **Automated Publishing**: Scheduled publishing to Substack with configurable frequency
 - 🔍 **Content Validation**: Ensures all published content is AI-generated only
+- ✅ **Fact-Checker Agent**: Validates claims, checks statistics, and assesses SEO compliance
 - 📊 **Analytics & Logging**: Comprehensive logging and publication tracking
 
 ## Technology Stack
@@ -165,6 +166,10 @@ The system is organized into several key components:
 - **ImageGenerator**: Generates featured images using DALL-E 3
 - **VideoGenerator**: Creates slideshow videos from images and text
 
+### Agents
+
+- **FactCheckerAgent**: Validates factual claims, assesses SEO value, and generates quality reports
+
 ### Publishers
 
 - **SubstackPublisher**: Handles authentication and publishing to Substack
@@ -186,13 +191,19 @@ substack_auto/
 │   │   ├── text_generator.py      # AI text generation
 │   │   ├── image_generator.py     # AI image generation
 │   │   └── video_generator.py     # Video creation
+│   ├── agents/
+│   │   ├── __init__.py            # Agent base classes
+│   │   └── fact_checker_agent.py  # Fact-checking and SEO validation
 │   ├── publishers/
 │   │   └── substack_publisher.py  # Substack integration
 │   ├── config/
 │   │   └── settings.py            # Configuration management
 │   └── main.py                    # Main orchestrator
 ├── tests/
-│   └── test_substack_auto.py      # Test suite
+│   ├── test_substack_auto.py      # Main test suite
+│   └── test_fact_checker_agent.py # Fact-checker tests
+├── docs/
+│   └── fact_checker_agent.md      # Fact-checker documentation
 ├── cli.py                         # Command-line interface
 ├── demo.py                        # Interactive demonstration
 ├── generated_content/             # Output directory (created automatically)
@@ -206,10 +217,41 @@ substack_auto/
 
 1. **Topic Selection**: AI analyzes configured topics and current trends
 2. **Content Creation**: GPT-4 generates comprehensive blog posts
-3. **Image Generation**: DALL-E 3 creates relevant featured images
-4. **Video Production**: System creates slideshow videos with title and content slides
-5. **Content Validation**: Ensures all content meets AI-only requirements
-6. **Publishing**: Automated upload and publication to Substack
+3. **Fact-Checking**: FactCheckerAgent validates claims and assesses SEO value
+4. **Image Generation**: DALL-E 3 creates relevant featured images
+5. **Video Production**: System creates slideshow videos with title and content slides
+6. **Content Validation**: Ensures all content meets AI-only requirements
+7. **Publishing**: Automated upload and publication to Substack
+
+## Fact-Checker Agent
+
+The Fact-Checker Agent automatically validates content quality and SEO compliance:
+
+### Features
+- **Claim Extraction**: Identifies factual claims and statistics
+- **Validation**: Cross-references claims with AI knowledge base
+- **Confidence Scoring**: Rates each claim from 0.0 to 1.0
+- **SEO Assessment**: Evaluates SEO value and featured snippet potential
+- **Quality Reports**: Generates detailed reports with recommendations
+
+### Usage Example
+
+```python
+from agents.fact_checker_agent import FactCheckerAgent
+
+fact_checker = FactCheckerAgent()
+
+# Check article quality
+report = fact_checker.process({
+    "title": "AI Market Growth in 2024",
+    "content": "The AI market grew 47% to reach $150 billion..."
+})
+
+print(f"Claims validated: {report['summary']['valid_claims']}")
+print(f"SEO score: {report['seo_report']['seo_score']}")
+```
+
+For detailed documentation, see [docs/fact_checker_agent.md](docs/fact_checker_agent.md).
 
 ## AI-Only Content Validation
 
