@@ -5,8 +5,16 @@ This module provides a CrewAI-powered agent for analyzing and optimizing
 content for search engine optimization (SEO).
 """
 import logging
+import re
 from typing import Dict, List, Optional
-from slugify import slugify
+
+# Try to import slugify, provide fallback if not available
+try:
+    from slugify import slugify as external_slugify
+    SLUGIFY_AVAILABLE = True
+except ImportError:
+    SLUGIFY_AVAILABLE = False
+    logging.warning("python-slugify not available. Using fallback slug generation.")
 
 try:
     from crewai import Agent, Task, Crew
@@ -23,6 +31,51 @@ except ImportError:
     logging.warning("BeautifulSoup not available. HTML analysis will be limited.")
 
 logger = logging.getLogger(__name__)
+
+
+def slugify(text: str, max_length: int = 60, word_boundary: bool = True) -> str:
+    """
+    Fallback slug generator when python-slugify is not available.
+    
+    Args:
+        text: Text to convert to slug
+        max_length: Maximum length of slug
+        word_boundary: Whether to break at word boundaries
+        
+    Returns:
+        URL-friendly slug
+    """
+    if SLUGIFY_AVAILABLE:
+        return external_slugify(text, max_length=max_length, word_boundary=word_boundary)
+    
+    # Fallback implementation
+    # Convert to lowercase
+    slug = text.lower()
+    
+    # Replace spaces and underscores with hyphens
+    slug = re.sub(r'[\s_]+', '-', slug)
+    
+    # Remove non-alphanumeric characters except hyphens
+    slug = re.sub(r'[^a-z0-9-]', '', slug)
+    
+    # Remove multiple consecutive hyphens
+    slug = re.sub(r'-+', '-', slug)
+    
+    # Remove leading/trailing hyphens
+    slug = slug.strip('-')
+    
+    # Truncate to max_length
+    if len(slug) > max_length:
+        if word_boundary:
+            # Try to break at a hyphen
+            slug = slug[:max_length]
+            last_hyphen = slug.rfind('-')
+            if last_hyphen > 0:
+                slug = slug[:last_hyphen]
+        else:
+            slug = slug[:max_length]
+    
+    return slug
 
 
 class SEOAnalyzer:
@@ -287,7 +340,7 @@ class SEOAnalyzer:
 
 def create_seo_agent(role: str = "SEO Specialist", 
                      goal: str = "Optimize content for search engines",
-                     backstory: str = None) -> Optional[Agent]:
+                     backstory: str = None):
     """
     Create a CrewAI SEO agent for content optimization.
     
@@ -322,7 +375,7 @@ def create_seo_agent(role: str = "SEO Specialist",
     return agent
 
 
-def create_seo_optimization_task(agent: Agent, title: str, content: str) -> Optional[Task]:
+def create_seo_optimization_task(agent, title: str, content: str):
     """
     Create an SEO optimization task for the agent.
     
