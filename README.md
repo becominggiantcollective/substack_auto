@@ -109,6 +109,31 @@ print(result)
    # Edit .env with your API keys and configuration
    ```
 
+5. **Validate installation:**
+   ```bash
+   # Test SEO agent functionality
+   python demo_seo_agent.py
+   
+   # Run test suite
+   python -m unittest tests.test_agents
+   
+   # Test basic imports
+   python -c "from src.agents.seo_agent import SEOAnalyzer; print('✅ Installation successful!')"
+   ```
+
+### Installation Notes
+
+The system supports graceful degradation when optional dependencies are unavailable:
+
+- **CrewAI** (optional): Required for multi-agent workflows. System works with basic SEO analysis if not installed.
+- **python-slugify** (optional): Provides enhanced slug generation. Falls back to built-in implementation if unavailable.
+- **BeautifulSoup4** (optional): Required for HTML metadata extraction. SEO analysis works without it.
+
+To install only core SEO functionality without CrewAI:
+```bash
+pip install python-slugify beautifulsoup4 lxml
+```
+
 ## Configuration
 
 Configure the system by editing the `.env` file:
@@ -178,6 +203,12 @@ The easiest way to get started is using the built-in CLI:
 ```bash
 # Run the interactive demo
 python cli.py demo
+
+# Run the SEO agent demonstration
+python demo_seo_agent.py
+
+# Set up your configuration
+python cli.py setup
 
 # Set up your configuration
 python cli.py setup
