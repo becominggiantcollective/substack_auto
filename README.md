@@ -5,6 +5,7 @@ An automated Substack system that creates and publishes blog entries, images, an
 ## Features
 
 - 🤖 **AI-Generated Content**: All content is created by AI agents with no human input
+- 🔬 **Research Agent**: Discovers trending topics and analyzes SEO keywords for optimal content
 - 📝 **Blog Post Generation**: Creates comprehensive, engaging blog posts on various topics
 - 🖼️ **Image Generation**: Generates featured images and thumbnails using DALL-E
 - 🎥 **Video Creation**: Creates slideshow-style videos with title and content slides
@@ -155,9 +156,100 @@ View current system status and statistics:
 python src/main.py --status
 ```
 
+## Research Agent
+
+The Research Agent is a powerful tool for discovering trending topics and optimizing content for SEO.
+
+### Features
+
+- **Trending Topic Discovery**: Uses AI to identify current, relevant topics based on your configured areas of interest
+- **SEO Keyword Analysis**: Generates primary, secondary, and long-tail keywords for each topic
+- **Search Intent Analysis**: Determines the primary search intent (informational/navigational/transactional)
+- **Content Recommendations**: Provides actionable tips for optimizing content
+- **Integration Ready**: Designed to work seamlessly with content generators and publishers
+
+### Usage Examples
+
+#### Basic Topic Discovery
+
+```python
+from agents.research_agent import ResearchAgent
+
+# Initialize the agent
+research_agent = ResearchAgent()
+
+# Discover trending topics
+topics = research_agent.discover_trending_topics(count=5)
+
+for topic in topics:
+    print(f"{topic['topic']} (Score: {topic['trend_score']}/10)")
+    print(f"  {topic['rationale']}")
+```
+
+#### Complete Research Summary
+
+```python
+# Generate a complete research summary with SEO analysis
+summary = research_agent.generate_research_summary(topic_count=3)
+
+for result in summary['research_results']:
+    print(f"Topic: {result['topic']}")
+    print(f"Primary Keywords: {', '.join(result['seo_keywords']['primary'])}")
+    print(f"Search Intent: {result['search_intent']}")
+```
+
+#### Integration with Content Generation
+
+```python
+# Get the best trending topic
+top_topic = research_agent.get_top_topic_with_seo()
+
+# Use with content generator
+from content_generators.text_generator import TextGenerator
+writer = TextGenerator()
+post = writer.generate_blog_post(top_topic['topic'])
+
+# Add SEO metadata
+post['seo_keywords'] = top_topic['seo_keywords']
+post['search_intent'] = top_topic['search_intent']
+```
+
+### Try the Research Agent
+
+Run the example demonstrations:
+
+```bash
+python examples_research_agent.py
+```
+
+For complete documentation, see [docs/research_agent.md](docs/research_agent.md).
+
+### Output Format
+
+The Research Agent outputs structured data compatible with other agents:
+
+```json
+{
+  "topic": "Topic Title",
+  "trend_score": 9,
+  "rationale": "Why this topic is trending...",
+  "seo_keywords": {
+    "primary": ["keyword1", "keyword2"],
+    "secondary": ["keyword3", "keyword4"],
+    "long_tail": ["specific phrase 1", "specific phrase 2"]
+  },
+  "search_intent": "informational",
+  "content_recommendations": "Optimization tips..."
+}
+```
+
 ## Architecture
 
 The system is organized into several key components:
+
+### Agents
+
+- **ResearchAgent**: Discovers trending topics and performs SEO keyword analysis to optimize content for search engines
 
 ### Content Generators
 
@@ -182,6 +274,8 @@ The system is organized into several key components:
 ```
 substack_auto/
 ├── src/
+│   ├── agents/
+│   │   └── research_agent.py      # Topic discovery & SEO analysis
 │   ├── content_generators/
 │   │   ├── text_generator.py      # AI text generation
 │   │   ├── image_generator.py     # AI image generation
@@ -191,10 +285,14 @@ substack_auto/
 │   ├── config/
 │   │   └── settings.py            # Configuration management
 │   └── main.py                    # Main orchestrator
+├── docs/
+│   └── research_agent.md          # Research Agent documentation
 ├── tests/
-│   └── test_substack_auto.py      # Test suite
+│   ├── test_substack_auto.py      # Main test suite
+│   └── test_research_agent.py     # Research Agent tests
 ├── cli.py                         # Command-line interface
 ├── demo.py                        # Interactive demonstration
+├── examples_research_agent.py     # Research Agent examples
 ├── generated_content/             # Output directory (created automatically)
 ├── requirements.txt               # Python dependencies
 ├── .env.example                   # Environment template
