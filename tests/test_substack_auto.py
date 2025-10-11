@@ -18,6 +18,7 @@ from content_generators.image_generator import ImageGenerator
 from content_generators.video_generator import VideoGenerator
 from publishers.substack_publisher import SubstackPublisher
 from main import ContentOrchestrator
+from agents.writer_agent import WriterAgent
 
 
 class TestSettings(unittest.TestCase):
@@ -410,6 +411,352 @@ class TestIntegration(unittest.TestCase):
         }):
             orchestrator = ContentOrchestrator()
             self.assertTrue(os.path.exists(self.temp_dir))
+
+
+class TestWriterAgent(unittest.TestCase):
+    """Test Writer Agent functionality."""
+    
+    def setUp(self):
+        """Set up test environment."""
+        with patch.dict(os.environ, {
+            'OPENAI_API_KEY': 'test_key',
+            'SUBSTACK_EMAIL': 'test@example.com',
+            'SUBSTACK_PASSWORD': 'test_password',
+            'SUBSTACK_PUBLICATION': 'test_publication'
+        }):
+            self.writer_agent = WriterAgent()
+    
+    def test_calculate_keyword_density(self):
+        """Test keyword density calculation."""
+        content = "AI is transforming healthcare. AI systems are being deployed in hospitals. The AI revolution is here."
+        keyword = "AI"
+        
+        density = self.writer_agent.calculate_keyword_density(content, keyword)
+        
+        # 3 occurrences of "AI" in 16 words = 0.1875 (18.75%)
+        self.assertGreater(density, 0.15)
+        self.assertLess(density, 0.20)
+    
+    def test_calculate_keyword_density_case_insensitive(self):
+        """Test that keyword density calculation is case-insensitive."""
+        content = "AI is great. ai is powerful. Ai is revolutionary."
+        keyword = "AI"
+        
+        density = self.writer_agent.calculate_keyword_density(content, keyword)
+        
+        # Should count all variations of "AI"
+        self.assertGreater(density, 0.3)  # 3 occurrences in ~9 words
+    
+    def test_calculate_keyword_density_multiword(self):
+        """Test keyword density with multi-word keywords."""
+        content = "Machine learning is powerful. Machine learning algorithms are everywhere. Machine learning transforms industries."
+        keyword = "machine learning"
+        
+        density = self.writer_agent.calculate_keyword_density(content, keyword)
+        
+        # 3 occurrences of "machine learning" in 13 words = ~0.23
+        self.assertGreater(density, 0.2)
+    
+    @patch('agents.writer_agent.OpenAI')
+    def test_generate_article(self, mock_openai):
+        """Test article generation."""
+        # Mock OpenAI response
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = """
+        ## Introduction
+        
+        Artificial intelligence is revolutionizing healthcare in unprecedented ways. AI technologies 
+        are enabling faster diagnoses, personalized treatments, and improved patient outcomes.
+        
+        ## Current Applications
+        
+        Healthcare AI systems are being deployed across multiple domains. Machine learning algorithms 
+        analyze medical images with remarkable accuracy. AI assists doctors in diagnosis and treatment 
+        planning.
+        
+        ## Future Prospects
+        
+        The future of AI in healthcare looks promising. Emerging technologies will continue to transform 
+        medical practice. AI-powered tools will become increasingly sophisticated and accessible.
+        
+        ## Conclusion
+        
+        Artificial intelligence represents a paradigm shift in healthcare delivery. As AI technology 
+        matures, its impact will only grow stronger.
+        """ * 10  # Repeat to get enough words
+        
+        mock_client = Mock()
+        mock_client.chat.completions.create.return_value = mock_response
+        mock_openai.return_value = mock_client
+        
+        self.writer_agent.client = mock_client
+        
+        article = self.writer_agent.generate_article(
+            topic="The Future of AI in Healthcare",
+            keywords=["AI", "healthcare", "artificial intelligence", "medical technology"]
+        )
+        
+        self.assertIn("title", article)
+        self.assertIn("content", article)
+        self.assertIn("word_count", article)
+        self.assertIn("keyword_density", article)
+        self.assertIn("keywords_used", article)
+        self.assertEqual(article["title"], "The Future of AI in Healthcare")
+        self.assertGreater(article["word_count"], 0)
+        self.assertIsInstance(article["keyword_density"], float)
+        self.assertIsInstance(article["keywords_used"], list)
+    
+    @patch('agents.writer_agent.OpenAI')
+    def test_generate_article_with_research_summary(self, mock_openai):
+        """Test article generation with research summary."""
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = "Test article content with research data." * 100
+        
+        mock_client = Mock()
+        mock_client.chat.completions.create.return_value = mock_response
+        mock_openai.return_value = mock_client
+        
+        self.writer_agent.client = mock_client
+        
+        research_summary = "Studies show that AI diagnostic tools achieve 95% accuracy."
+        
+        article = self.writer_agent.generate_article(
+            topic="AI Diagnostics",
+            keywords=["AI", "diagnostics", "accuracy"],
+            research_summary=research_summary
+        )
+        
+        self.assertIn("title", article)
+        self.assertIn("content", article)
+        # Verify that OpenAI was called with the research summary in the prompt
+        call_args = mock_client.chat.completions.create.call_args
+        prompt = call_args[1]["messages"][0]["content"]
+        self.assertIn("Research Summary", prompt)
+    
+    @patch('agents.writer_agent.OpenAI')
+    def test_generate_meta_title(self, mock_openai):
+        """Test meta title generation."""
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = "AI Healthcare: Transform Your Practice"
+        
+        mock_client = Mock()
+        mock_client.chat.completions.create.return_value = mock_response
+        mock_openai.return_value = mock_client
+        
+        self.writer_agent.client = mock_client
+        
+        meta_title = self.writer_agent.generate_meta_title(
+            title="The Future of AI in Healthcare",
+            keywords=["AI", "healthcare"]
+        )
+        
+        self.assertEqual(meta_title, "AI Healthcare: Transform Your Practice")
+        self.assertLessEqual(len(meta_title), 70)
+    
+    @patch('agents.writer_agent.OpenAI')
+    def test_generate_meta_title_truncation(self, mock_openai):
+        """Test that overly long meta titles are truncated."""
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = "This is a very long meta title that exceeds the maximum character limit and should be truncated properly"
+        
+        mock_client = Mock()
+        mock_client.chat.completions.create.return_value = mock_response
+        mock_openai.return_value = mock_client
+        
+        self.writer_agent.client = mock_client
+        
+        meta_title = self.writer_agent.generate_meta_title(
+            title="Test Title",
+            keywords=["test"]
+        )
+        
+        self.assertLessEqual(len(meta_title), 70)
+    
+    @patch('agents.writer_agent.OpenAI')
+    def test_generate_meta_description(self, mock_openai):
+        """Test meta description generation."""
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = "Discover how AI is transforming healthcare with cutting-edge diagnostics, personalized treatments, and improved patient outcomes."
+        
+        mock_client = Mock()
+        mock_client.chat.completions.create.return_value = mock_response
+        mock_openai.return_value = mock_client
+        
+        self.writer_agent.client = mock_client
+        
+        meta_description = self.writer_agent.generate_meta_description(
+            title="AI in Healthcare",
+            content="AI is revolutionizing healthcare...",
+            keywords=["AI", "healthcare"]
+        )
+        
+        self.assertGreater(len(meta_description), 100)
+        self.assertLessEqual(len(meta_description), 160)
+    
+    @patch('agents.writer_agent.OpenAI')
+    def test_generate_meta_description_truncation(self, mock_openai):
+        """Test that overly long meta descriptions are truncated."""
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = "This is an extremely long meta description that far exceeds the maximum character limit of 160 characters and should definitely be truncated to ensure it fits within the optimal length for search engine results pages."
+        
+        mock_client = Mock()
+        mock_client.chat.completions.create.return_value = mock_response
+        mock_openai.return_value = mock_client
+        
+        self.writer_agent.client = mock_client
+        
+        meta_description = self.writer_agent.generate_meta_description(
+            title="Test",
+            content="Test content",
+            keywords=["test"]
+        )
+        
+        self.assertLessEqual(len(meta_description), 160)
+    
+    @patch('agents.writer_agent.OpenAI')
+    def test_generate_tags(self, mock_openai):
+        """Test tag generation."""
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = "AI, healthcare, machine learning, diagnostics, medical technology"
+        
+        mock_client = Mock()
+        mock_client.chat.completions.create.return_value = mock_response
+        mock_openai.return_value = mock_client
+        
+        self.writer_agent.client = mock_client
+        
+        tags = self.writer_agent.generate_tags(
+            title="AI in Healthcare",
+            content="AI is revolutionizing healthcare with machine learning...",
+            keywords=["AI", "healthcare"]
+        )
+        
+        self.assertIsInstance(tags, list)
+        self.assertGreater(len(tags), 0)
+        self.assertLessEqual(len(tags), 8)
+    
+    @patch('agents.writer_agent.OpenAI')
+    def test_create_complete_article(self, mock_openai):
+        """Test complete article creation with all metadata."""
+        # Mock multiple OpenAI responses for different calls
+        mock_article_response = Mock()
+        mock_article_response.choices = [Mock()]
+        mock_article_response.choices[0].message.content = """
+        ## Introduction
+        
+        Artificial intelligence is revolutionizing healthcare. AI systems provide advanced diagnostics
+        and personalized treatment plans.
+        
+        ## Body
+        
+        Healthcare AI applications span multiple domains. Machine learning algorithms analyze complex
+        medical data with unprecedented accuracy. AI-powered tools assist medical professionals in
+        making informed decisions.
+        
+        ## Conclusion
+        
+        The future of AI in healthcare is bright and transformative.
+        """ * 20  # Repeat to meet word count
+        
+        mock_meta_title_response = Mock()
+        mock_meta_title_response.choices = [Mock()]
+        mock_meta_title_response.choices[0].message.content = "AI Healthcare Revolution"
+        
+        mock_meta_desc_response = Mock()
+        mock_meta_desc_response.choices = [Mock()]
+        mock_meta_desc_response.choices[0].message.content = "Discover how AI is transforming healthcare with advanced diagnostics and personalized care."
+        
+        mock_tags_response = Mock()
+        mock_tags_response.choices = [Mock()]
+        mock_tags_response.choices[0].message.content = "AI, healthcare, machine learning, diagnostics, medical"
+        
+        mock_client = Mock()
+        mock_client.chat.completions.create.side_effect = [
+            mock_article_response,
+            mock_meta_title_response,
+            mock_meta_desc_response,
+            mock_tags_response
+        ]
+        mock_openai.return_value = mock_client
+        
+        self.writer_agent.client = mock_client
+        
+        complete_article = self.writer_agent.create_complete_article(
+            topic="The Future of AI in Healthcare",
+            keywords=["AI", "healthcare", "machine learning", "diagnostics"],
+            research_summary="Recent studies show significant improvements in diagnostic accuracy."
+        )
+        
+        # Verify all required fields are present
+        self.assertIn("title", complete_article)
+        self.assertIn("content", complete_article)
+        self.assertIn("meta_title", complete_article)
+        self.assertIn("meta_description", complete_article)
+        self.assertIn("tags", complete_article)
+        self.assertIn("word_count", complete_article)
+        self.assertIn("keyword_density", complete_article)
+        self.assertIn("keywords_used", complete_article)
+        self.assertIn("seo_optimized", complete_article)
+        self.assertIn("ai_generated", complete_article)
+        
+        # Verify data types and values
+        self.assertEqual(complete_article["title"], "The Future of AI in Healthcare")
+        self.assertIsInstance(complete_article["content"], str)
+        self.assertIsInstance(complete_article["meta_title"], str)
+        self.assertIsInstance(complete_article["meta_description"], str)
+        self.assertIsInstance(complete_article["tags"], list)
+        self.assertIsInstance(complete_article["word_count"], int)
+        self.assertIsInstance(complete_article["keyword_density"], float)
+        self.assertIsInstance(complete_article["keywords_used"], list)
+        self.assertTrue(complete_article["seo_optimized"])
+        self.assertTrue(complete_article["ai_generated"])
+        
+        # Verify reasonable values
+        self.assertGreater(complete_article["word_count"], 0)
+        self.assertGreaterEqual(len(complete_article["tags"]), 1)
+        self.assertLessEqual(len(complete_article["tags"]), 8)
+    
+    @patch('agents.writer_agent.OpenAI')
+    @patch('agents.writer_agent.settings')
+    def test_writer_agent_with_custom_settings(self, mock_settings, mock_openai):
+        """Test that WriterAgent respects custom settings."""
+        # Mock the settings object with custom values
+        mock_settings.openai_api_key = 'test_key'
+        mock_settings.content_tone = 'professional and technical'
+        mock_settings.target_audience = 'software engineers'
+        mock_settings.content_style = 'detailed and code-heavy'
+        mock_settings.custom_instructions = ''
+        
+        writer = WriterAgent()
+        
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = "Test content" * 100
+        
+        mock_client = Mock()
+        mock_client.chat.completions.create.return_value = mock_response
+        mock_openai.return_value = mock_client
+        
+        writer.client = mock_client
+        
+        writer.generate_article(
+            topic="Python Best Practices",
+            keywords=["Python", "best practices", "coding"]
+        )
+        
+        # Verify that the custom settings were used in the prompt
+        call_args = mock_client.chat.completions.create.call_args
+        prompt = call_args[1]["messages"][0]["content"]
+        self.assertIn("professional and technical", prompt)
+        self.assertIn("software engineers", prompt)
+        self.assertIn("detailed and code-heavy", prompt)
 
 
 if __name__ == '__main__':
