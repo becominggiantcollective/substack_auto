@@ -6,6 +6,7 @@ An automated Substack system that creates and publishes blog entries, images, an
 
 - 🤖 **AI-Generated Content**: All content is created by AI agents with no human input
 - 📝 **Blog Post Generation**: Creates comprehensive, engaging blog posts on various topics
+- ✍️ **Writer Agent**: SEO-optimized article generation with keyword integration and meta data
 - 🖼️ **Image Generation**: Generates featured images and thumbnails using DALL-E
 - 🎥 **Video Creation**: Creates slideshow-style videos with title and content slides
 - 📅 **Automated Publishing**: Scheduled publishing to Substack with configurable frequency
@@ -155,9 +156,54 @@ View current system status and statistics:
 python src/main.py --status
 ```
 
+## Writer Agent
+
+The Writer Agent is a specialized AI agent for generating SEO-optimized articles with keyword integration.
+
+### Features
+
+- **SEO-Optimized Content**: Generates articles (800-1200 words) with natural keyword integration
+- **Keyword Density Management**: Maintains optimal keyword density (~2%) for SEO
+- **Meta Data Generation**: Creates SEO-optimized meta titles and descriptions
+- **Tag Suggestions**: Generates relevant tags for content discovery
+- **Research Integration**: Incorporates research summaries into article content
+- **Configurable Output**: Respects content style, tone, and audience settings
+
+### Usage Example
+
+```python
+from agents.writer_agent import WriterAgent
+
+# Initialize the agent
+writer = WriterAgent()
+
+# Generate a complete article
+article = writer.create_complete_article(
+    topic="The Future of Artificial Intelligence",
+    keywords=["AI", "artificial intelligence", "machine learning"],
+    research_summary="AI is rapidly evolving with new breakthroughs..."
+)
+
+# Access the generated content
+print(f"Title: {article['title']}")
+print(f"Meta Title: {article['meta_title']}")
+print(f"Meta Description: {article['meta_description']}")
+print(f"Tags: {', '.join(article['tags'])}")
+print(f"Word Count: {article['word_count']}")
+print(f"Keyword Density: {article['keyword_density']:.2%}")
+```
+
+For detailed documentation and more examples, see:
+- **Documentation**: `docs/writer_agent.md`
+- **Example Script**: Run `python example_writer_agent.py`
+
 ## Architecture
 
 The system is organized into several key components:
+
+### Agents
+
+- **WriterAgent**: SEO-optimized article generation with keyword integration, meta data, and tag suggestions
 
 ### Content Generators
 
@@ -182,21 +228,26 @@ The system is organized into several key components:
 ```
 substack_auto/
 ├── src/
+│   ├── agents/
+│   │   └── writer_agent.py         # SEO-optimized article generation
 │   ├── content_generators/
-│   │   ├── text_generator.py      # AI text generation
-│   │   ├── image_generator.py     # AI image generation
-│   │   └── video_generator.py     # Video creation
+│   │   ├── text_generator.py       # AI text generation
+│   │   ├── image_generator.py      # AI image generation
+│   │   └── video_generator.py      # Video creation
 │   ├── publishers/
-│   │   └── substack_publisher.py  # Substack integration
+│   │   └── substack_publisher.py   # Substack integration
 │   ├── config/
-│   │   └── settings.py            # Configuration management
-│   └── main.py                    # Main orchestrator
+│   │   └── settings.py             # Configuration management
+│   └── main.py                     # Main orchestrator
+├── docs/
+│   └── writer_agent.md             # Writer Agent documentation
 ├── tests/
-│   └── test_substack_auto.py      # Test suite
-├── cli.py                         # Command-line interface
-├── demo.py                        # Interactive demonstration
-├── generated_content/             # Output directory (created automatically)
-├── requirements.txt               # Python dependencies
+│   └── test_substack_auto.py       # Test suite
+├── cli.py                          # Command-line interface
+├── demo.py                         # Interactive demonstration
+├── example_writer_agent.py         # Writer Agent usage examples
+├── generated_content/              # Output directory (created automatically)
+├── requirements.txt                # Python dependencies
 ├── .env.example                   # Environment template
 ├── .gitignore                     # Git ignore rules
 └── README.md                      # This file
