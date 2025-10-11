@@ -7,8 +7,15 @@ This directory contains research and evaluation documents for technical decision
 ### Multi-Agent Framework Evaluation
 
 **Files**:
-- [`crewai_vs_autogen_evaluation.md`](./crewai_vs_autogen_evaluation.md) - Comprehensive comparison
-- [`DECISION_SUMMARY.md`](./DECISION_SUMMARY.md) - Executive summary and decision
+- [`crewai_vs_autogen_evaluation.md`](./crewai_vs_autogen_evaluation.md) - Comprehensive comparison (30 min read)
+- [`DECISION_SUMMARY.md`](./DECISION_SUMMARY.md) - Executive summary and decision (10 min read)
+- [`QUICK_START.md`](./QUICK_START.md) - Quick start guide for implementation (5 min read)
+- [`COMPARISON_TABLE.md`](./COMPARISON_TABLE.md) - Side-by-side feature comparison (3 min read)
+- [`README.md`](./README.md) - This file
+
+**Code Examples**:
+- [`../../examples/crewai_demo.py`](../../examples/crewai_demo.py) - Full CrewAI implementation demo
+- [`../../examples/integration_example.py`](../../examples/integration_example.py) - Integration guide with existing system
 
 **Summary**:
 Comprehensive evaluation of CrewAI and AutoGen frameworks for implementing multi-agent content generation with SEO optimization focus.
@@ -23,8 +30,44 @@ Comprehensive evaluation of CrewAI and AutoGen frameworks for implementing multi
 - Faster implementation timeline (2-4 weeks vs 4-8 weeks)
 
 **Scores**:
-- CrewAI: 9/10 for Substack Auto use case
-- AutoGen: 7/10 for Substack Auto use case
+- CrewAI: 9.4/10 for Substack Auto use case
+- AutoGen: 7.8/10 for Substack Auto use case
+
+## Document Guide
+
+### For First-Time Readers
+
+**Quick Path** (15 minutes):
+1. Read [DECISION_SUMMARY.md](./DECISION_SUMMARY.md) - Executive summary
+2. Review [COMPARISON_TABLE.md](./COMPARISON_TABLE.md) - Quick comparison
+3. Skim [QUICK_START.md](./QUICK_START.md) - Implementation guide
+
+**Deep Dive** (60 minutes):
+1. Read [crewai_vs_autogen_evaluation.md](./crewai_vs_autogen_evaluation.md) - Full analysis
+2. Review [DECISION_SUMMARY.md](./DECISION_SUMMARY.md) - Implementation plan
+3. Study code examples in `examples/` directory
+4. Read [QUICK_START.md](./QUICK_START.md) - Getting started
+
+### For Developers
+
+**Must Read**:
+1. [crewai_vs_autogen_evaluation.md](./crewai_vs_autogen_evaluation.md) - Technical details
+2. [../../examples/crewai_demo.py](../../examples/crewai_demo.py) - Implementation example
+3. [../../examples/integration_example.py](../../examples/integration_example.py) - Integration guide
+
+### For Product/Business Team
+
+**Must Read**:
+1. [DECISION_SUMMARY.md](./DECISION_SUMMARY.md) - Business case and ROI
+2. [COMPARISON_TABLE.md](./COMPARISON_TABLE.md) - Feature comparison
+3. Cost analysis section in evaluation doc
+
+### For Implementation Team
+
+**Must Read**:
+1. [QUICK_START.md](./QUICK_START.md) - Getting started guide
+2. [DECISION_SUMMARY.md](./DECISION_SUMMARY.md) - Roadmap and timeline
+3. Code examples for reference implementation
 
 ## Quick Links
 
