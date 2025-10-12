@@ -7,7 +7,7 @@ The Writer Agent is an AI-powered content generation agent that creates SEO-opti
 ## Features
 
 - **SEO-Optimized Content Generation**: Creates articles with natural keyword integration
-- **Keyword Density Analysis**: Calculates and optimizes keyword density (target: 2%)
+- **Keyword Density Analysis**: Calculates and optimizes keyword density (maximum: 2% to avoid robotic tone)
 - **Content Structure Validation**: Ensures proper paragraph structure and readability
 - **Meta Data Generation**: Produces SEO-optimized meta titles and descriptions
 - **Tag Suggestions**: Generates relevant tags for content categorization
@@ -110,7 +110,7 @@ Initialize the Writer Agent.
 - `model`: GPT model to use (default: "gpt-4")
 - `target_word_count_min`: Minimum target word count (800)
 - `target_word_count_max`: Maximum target word count (1200)
-- `target_keyword_density`: Target keyword density (0.02 = 2%)
+- `target_keyword_density`: Target keyword density (0.02 = 2% maximum to avoid robotic tone)
 
 #### `create_complete_content(topic, keywords, research_summary, target_word_count=None)`
 
@@ -262,16 +262,17 @@ Dictionary with validation results:
 
 ### Keyword Density
 
-The Writer Agent targets a 2% keyword density for primary keywords. This is calculated as:
+The Writer Agent enforces a maximum 2% keyword density to maintain natural, readable content and avoid robotic tone. This is calculated as:
 
 ```
 Keyword Density = (Keyword Occurrences / Total Words) × 100
 ```
 
 **Best Practices:**
-- Primary keywords: 2-2.5% density
+- Primary keywords: 1.5-2.0% density (optimal)
 - Secondary keywords: 1-1.5% density
-- Avoid keyword stuffing (>3% density)
+- Maximum keyword density: 2% (enforced to prevent robotic tone)
+- Avoid keyword stuffing (>2% density will be penalized in SEO scoring)
 
 ### Content Structure
 
@@ -470,7 +471,7 @@ INFO:agents.writer_agent:Content generation complete. SEO score: 92/100
 2. **Target Relevant Keywords**: Focus on 3-5 primary keywords rather than a long list
 3. **Validate Output**: Always check the SEO score and structure validation
 4. **Iterate if Needed**: Low SEO scores may require regeneration with adjusted parameters
-5. **Monitor Keyword Density**: Aim for 2% density on primary keywords
+5. **Monitor Keyword Density**: Keep density at 1.5-2% maximum to maintain natural tone and avoid robotic-sounding content
 6. **Review Generated Content**: While AI-generated, content should be reviewed for accuracy
 
 ## Troubleshooting
@@ -478,17 +479,19 @@ INFO:agents.writer_agent:Content generation complete. SEO score: 92/100
 ### Low SEO Score
 
 If SEO score is below 70:
-- Check keyword densities (should be 1.5-2.5%)
+- Check keyword densities (should be 1.5-2.0% for optimal scoring)
 - Verify word count is within 800-1200 range
 - Ensure structure validation passes all checks
 - Consider adjusting research summary for more focused content
 
-### Keyword Stuffing
+### Keyword Stuffing / Robotic Tone
 
-If keyword density is too high (>3%):
+If keyword density is too high (>2%):
+- Content will sound robotic and be penalized in SEO scoring
 - Use fewer instances of the keyword in research summary
 - Add more secondary keywords to balance the content
 - Request regeneration with adjusted parameters
+- Remember: maximum 2% density is enforced to maintain natural tone
 
 ### Poor Structure
 

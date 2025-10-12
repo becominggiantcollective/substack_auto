@@ -36,7 +36,7 @@ class WriterAgent:
         self.model = "gpt-4"
         self.target_word_count_min = 800
         self.target_word_count_max = 1200
-        self.target_keyword_density = 0.02  # 2% keyword density target
+        self.target_keyword_density = 0.02  # 2% keyword density target (maximum)
         
     def calculate_keyword_density(self, content: str, keywords: List[str]) -> Dict[str, float]:
         """
@@ -139,7 +139,7 @@ class WriterAgent:
         
         Requirements:
         - Target word count: approximately {target_word_count} words (between {self.target_word_count_min}-{self.target_word_count_max})
-        - Integrate the SEO keywords naturally throughout the content (aim for 2% keyword density)
+        - Integrate the SEO keywords naturally throughout the content (maximum 2% keyword density - do not exceed this to avoid robotic tone)
         - Use clear, engaging structure with proper paragraphs
         - Include an engaging opening paragraph that hooks the reader
         - Organize content into logical sections with smooth transitions
@@ -473,11 +473,13 @@ class WriterAgent:
         # Keyword density score (40 points max)
         if keyword_densities:
             avg_density = sum(keyword_densities.values()) / len(keyword_densities)
-            # Optimal density is around 2%
-            if 0.015 <= avg_density <= 0.025:  # 1.5% - 2.5%
+            # Optimal density is 1.5-2% (maximum 2% to avoid robotic tone)
+            if 0.015 <= avg_density <= 0.020:  # 1.5% - 2.0% (optimal)
                 score += 40
-            elif 0.01 <= avg_density <= 0.03:  # 1% - 3%
+            elif 0.01 <= avg_density <= 0.025:  # 1% - 2.5% (acceptable)
                 score += 30
+            elif avg_density > 0.025:  # Above 2.5% (penalized for robotic tone)
+                score += 10
             elif avg_density > 0:
                 score += 20
         
