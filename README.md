@@ -164,6 +164,7 @@ The Research Agent is a powerful tool for discovering trending topics and optimi
 
 - **Trending Topic Discovery**: Uses AI to identify current, relevant topics based on your configured areas of interest
 - **SEO Keyword Analysis**: Generates primary, secondary, and long-tail keywords for each topic
+- **Competition Analysis**: Analyzes competition level, keyword difficulty, and identifies content gaps for competitive advantage
 - **Search Intent Analysis**: Determines the primary search intent (informational/navigational/transactional)
 - **Content Recommendations**: Provides actionable tips for optimizing content
 - **Integration Ready**: Designed to work seamlessly with content generators and publishers
@@ -189,13 +190,14 @@ for topic in topics:
 #### Complete Research Summary
 
 ```python
-# Generate a complete research summary with SEO analysis
-summary = research_agent.generate_research_summary(topic_count=3)
+# Generate a complete research summary with SEO and competition analysis
+summary = research_agent.generate_research_summary(topic_count=3, include_competition=True)
 
 for result in summary['research_results']:
     print(f"Topic: {result['topic']}")
     print(f"Primary Keywords: {', '.join(result['seo_keywords']['primary'])}")
-    print(f"Search Intent: {result['search_intent']}")
+    print(f"Competition Level: {result['competition']['level']}")
+    print(f"Keyword Difficulty: {result['competition']['keyword_difficulty']}/100")
 ```
 
 #### Integration with Content Generation
@@ -239,7 +241,14 @@ The Research Agent outputs structured data compatible with other agents:
     "long_tail": ["specific phrase 1", "specific phrase 2"]
   },
   "search_intent": "informational",
-  "content_recommendations": "Optimization tips..."
+  "content_recommendations": "Optimization tips...",
+  "competition": {
+    "level": "medium",
+    "keyword_difficulty": 55,
+    "content_gaps": ["gap 1", "gap 2"],
+    "differentiation_opportunities": ["opportunity 1", "opportunity 2"],
+    "recommended_focus": "Focus on practical, actionable content"
+  }
 }
 ```
 

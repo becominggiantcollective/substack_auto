@@ -129,6 +129,101 @@ class ResearchAgent:
         return fallback_topics
     
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+    def analyze_competition(self, topic: str, keywords: Optional[List[str]] = None) -> Dict[str, any]:
+        """
+        Analyze competition level for a given topic and keywords.
+        
+        Args:
+            topic: The topic to analyze competition for
+            keywords: Optional list of keywords to analyze competition for
+        
+        Returns:
+            Dictionary with competition analysis including difficulty scores and opportunities
+        """
+        keywords_text = ""
+        if keywords:
+            keywords_text = f"\nFocus on these keywords: {', '.join(keywords[:5])}"
+        
+        prompt = f"""
+        You are a competitive analysis expert for content marketing.
+        
+        Topic: "{topic}"{keywords_text}
+        
+        Analyze the competitive landscape for this topic and provide:
+        1. Competition level (low/medium/high): Overall difficulty to rank for this topic
+        2. Keyword difficulty: Average difficulty score (1-100) for ranking
+        3. Content saturation: How saturated this topic is with existing content
+        4. Content gaps: Specific angles or subtopics with lower competition
+        5. Differentiation opportunities: Unique approaches to stand out
+        6. Recommended focus: Which aspects to emphasize for competitive advantage
+        
+        Format your response as a JSON object:
+        {{
+            "competition_level": "medium",
+            "keyword_difficulty": 45,
+            "content_saturation": "high",
+            "content_gaps": ["specific gap 1", "specific gap 2", "specific gap 3"],
+            "differentiation_opportunities": ["unique angle 1", "unique angle 2"],
+            "recommended_focus": "Brief recommendation on what to focus on",
+            "competitive_advantage": "What makes this approach stand out"
+        }}
+        
+        Return ONLY the JSON object, no additional text.
+        """
+        
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=800,
+                temperature=0.6
+            )
+            
+            import json
+            content = response.choices[0].message.content.strip()
+            
+            # Extract JSON if wrapped in code blocks
+            if content.startswith("```"):
+                content = content.split("```")[1]
+                if content.startswith("json"):
+                    content = content[4:].strip()
+            
+            competition = json.loads(content)
+            
+            # Add metadata
+            competition["analyzed_at"] = datetime.now().isoformat()
+            competition["topic"] = topic
+            
+            logger.info(f"Analyzed competition for topic: {topic}")
+            return competition
+            
+        except Exception as e:
+            logger.error(f"Error analyzing competition: {e}")
+            # Fallback to basic competition analysis
+            return self._generate_fallback_competition(topic)
+    
+    def _generate_fallback_competition(self, topic: str) -> Dict[str, any]:
+        """Generate fallback competition analysis when API call fails."""
+        return {
+            "competition_level": "medium",
+            "keyword_difficulty": 50,
+            "content_saturation": "moderate",
+            "content_gaps": [
+                f"Practical implementation of {topic}",
+                f"Beginner's perspective on {topic}",
+                f"Case studies in {topic}"
+            ],
+            "differentiation_opportunities": [
+                "Focus on real-world examples",
+                "Provide actionable step-by-step guides"
+            ],
+            "recommended_focus": "Focus on practical, actionable content with unique examples",
+            "competitive_advantage": "Provide depth and practicality that others may lack",
+            "analyzed_at": datetime.now().isoformat(),
+            "topic": topic
+        }
+    
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     def analyze_seo_keywords(self, topic: str, target_keywords: Optional[List[str]] = None) -> Dict[str, any]:
         """
         Analyze and generate SEO keywords for a given topic.
@@ -229,17 +324,19 @@ class ResearchAgent:
     def generate_research_summary(
         self, 
         topic_count: int = 3, 
-        base_topics: Optional[List[str]] = None
+        base_topics: Optional[List[str]] = None,
+        include_competition: bool = True
     ) -> Dict[str, any]:
         """
-        Generate a complete research summary with trending topics and SEO analysis.
+        Generate a complete research summary with trending topics, SEO analysis, and competition data.
         
         Args:
             topic_count: Number of topics to research (default: 3)
             base_topics: Optional list of base topics to focus on
+            include_competition: Whether to include competition analysis (default: True)
         
         Returns:
-            Complete research summary with topics and SEO keywords
+            Complete research summary with topics, SEO keywords, and competition analysis
         """
         logger.info(f"Starting research summary generation for {topic_count} topics")
         
@@ -247,7 +344,7 @@ class ResearchAgent:
             # Discover trending topics
             trending_topics = self.discover_trending_topics(base_topics, topic_count)
             
-            # Analyze SEO keywords for each topic
+            # Analyze SEO keywords and competition for each topic
             research_results = []
             for topic_data in trending_topics:
                 topic_title = topic_data["topic"]
@@ -255,8 +352,8 @@ class ResearchAgent:
                 # Get SEO keywords
                 seo_analysis = self.analyze_seo_keywords(topic_title)
                 
-                # Combine results
-                research_results.append({
+                # Build result object
+                result = {
                     "topic": topic_title,
                     "rationale": topic_data["rationale"],
                     "trend_score": topic_data["trend_score"],
@@ -269,15 +366,34 @@ class ResearchAgent:
                     "content_recommendations": seo_analysis["content_recommendations"],
                     "estimated_monthly_searches": seo_analysis.get("estimated_monthly_searches", "unknown"),
                     "discovered_at": topic_data["discovered_at"]
-                })
+                }
+                
+                # Add competition analysis if requested
+                if include_competition:
+                    competition_analysis = self.analyze_competition(
+                        topic_title, 
+                        seo_analysis["primary_keywords"]
+                    )
+                    result["competition"] = {
+                        "level": competition_analysis["competition_level"],
+                        "keyword_difficulty": competition_analysis["keyword_difficulty"],
+                        "content_saturation": competition_analysis["content_saturation"],
+                        "content_gaps": competition_analysis["content_gaps"],
+                        "differentiation_opportunities": competition_analysis["differentiation_opportunities"],
+                        "recommended_focus": competition_analysis["recommended_focus"],
+                        "competitive_advantage": competition_analysis.get("competitive_advantage", "")
+                    }
+                
+                research_results.append(result)
             
             summary = {
                 "research_date": datetime.now().isoformat(),
                 "topic_count": len(research_results),
                 "base_topics": base_topics or settings.topics_list,
                 "research_results": research_results,
-                "agent_version": "1.0.0",
-                "status": "success"
+                "agent_version": "1.1.0",
+                "status": "success",
+                "includes_competition_analysis": include_competition
             }
             
             logger.info(f"Research summary generated successfully with {len(research_results)} topics")

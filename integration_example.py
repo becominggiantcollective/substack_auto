@@ -49,6 +49,11 @@ def create_seo_optimized_post():
         print(f"✅ Selected topic: {top_topic['topic']}")
         print(f"   Trend score: {top_topic['trend_score']}/10")
         print(f"   Primary keywords: {', '.join(top_topic['seo_keywords']['primary'][:3])}")
+        
+        # Check if competition analysis is included
+        if 'competition' in top_topic:
+            print(f"   Competition level: {top_topic['competition']['level']}")
+            print(f"   Keyword difficulty: {top_topic['competition']['keyword_difficulty']}/100")
         print()
     except Exception as e:
         print(f"⚠️  Using fallback topic due to: {e}")
@@ -56,11 +61,12 @@ def create_seo_optimized_post():
         topic_title = text_generator.generate_topic()
         print(f"✅ Generated topic: {topic_title}\n")
         
-        # Analyze SEO for the fallback topic
+        # Analyze SEO and competition for the fallback topic
         top_topic = {
             'topic': topic_title,
             'trend_score': 7,
-            'seo_keywords': research_agent.analyze_seo_keywords(topic_title)
+            'seo_keywords': research_agent.analyze_seo_keywords(topic_title),
+            'competition': research_agent.analyze_competition(topic_title)
         }
     
     # Step 2: Generate content
@@ -80,9 +86,10 @@ def create_seo_optimized_post():
         print("⚠️  Image generation skipped (API key required)")
     print()
     
-    # Step 4: Add SEO metadata
-    print("🔍 Step 4: Adding SEO metadata...")
+    # Step 4: Add SEO and competition metadata
+    print("🔍 Step 4: Adding SEO and competition metadata...")
     seo_keywords = top_topic.get('seo_keywords', {})
+    competition_data = top_topic.get('competition', {})
     
     # Extract keywords from the complex structure
     if isinstance(seo_keywords, dict):
@@ -95,7 +102,7 @@ def create_seo_optimized_post():
         secondary_keywords = seo_keywords.get('secondary_keywords', [])
         long_tail_keywords = seo_keywords.get('long_tail_keywords', [])
     
-    # Create complete post with SEO metadata
+    # Create complete post with SEO and competition metadata
     complete_post = {
         "post_data": post_data,
         "image_result": image_result,
@@ -107,6 +114,13 @@ def create_seo_optimized_post():
             "content_recommendations": top_topic.get('content_recommendations', ''),
             "trend_score": top_topic.get('trend_score', 0)
         },
+        "competition_data": {
+            "level": competition_data.get('level', 'unknown'),
+            "keyword_difficulty": competition_data.get('keyword_difficulty', 0),
+            "content_saturation": competition_data.get('content_saturation', 'unknown'),
+            "content_gaps": competition_data.get('content_gaps', []),
+            "recommended_focus": competition_data.get('recommended_focus', '')
+        },
         "research_data": {
             "topic": top_topic['topic'],
             "rationale": top_topic.get('rationale', ''),
@@ -117,10 +131,13 @@ def create_seo_optimized_post():
         "seo_optimized": True
     }
     
-    print(f"✅ SEO metadata added")
+    print(f"✅ SEO and competition metadata added")
     print(f"   Primary keywords: {len(primary_keywords)}")
     print(f"   Secondary keywords: {len(secondary_keywords)}")
     print(f"   Long-tail keywords: {len(long_tail_keywords)}")
+    if competition_data:
+        print(f"   Competition level: {competition_data.get('level', 'unknown')}")
+        print(f"   Keyword difficulty: {competition_data.get('keyword_difficulty', 0)}/100")
     print()
     
     # Step 5: Save the complete post

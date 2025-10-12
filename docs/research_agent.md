@@ -8,6 +8,7 @@ The Research Agent is responsible for discovering trending topics and analyzing 
 
 - **Trending Topic Discovery**: Identifies current, relevant topics based on configured interest areas
 - **SEO Keyword Analysis**: Generates primary, secondary, and long-tail keywords for optimization
+- **Competition Analysis**: Analyzes competition level, keyword difficulty, and content gaps
 - **Search Intent Analysis**: Determines the primary search intent for better content targeting
 - **Content Recommendations**: Provides actionable tips for content optimization
 - **Fallback Mechanisms**: Gracefully handles API failures with intelligent fallbacks
@@ -99,17 +100,52 @@ target_keywords = ["enterprise ai", "ai implementation", "business automation"]
 seo_data = research_agent.analyze_seo_keywords(topic, target_keywords)
 ```
 
+### Competition Analysis
+
+```python
+# Analyze competition for a specific topic
+topic = "AI in Healthcare"
+keywords = ["ai healthcare", "medical ai", "healthcare automation"]
+
+competition = research_agent.analyze_competition(topic, keywords)
+
+print(f"Competition Level: {competition['competition_level']}")
+print(f"Keyword Difficulty: {competition['keyword_difficulty']}/100")
+print(f"Content Saturation: {competition['content_saturation']}")
+print(f"Content Gaps: {', '.join(competition['content_gaps'])}")
+print(f"Recommended Focus: {competition['recommended_focus']}")
+```
+
+### Complete Research with Competition
+
+```python
+# Generate research summary with competition analysis included
+summary = research_agent.generate_research_summary(
+    topic_count=3, 
+    include_competition=True
+)
+
+for result in summary['research_results']:
+    print(f"Topic: {result['topic']}")
+    print(f"Trend Score: {result['trend_score']}/10")
+    print(f"Competition Level: {result['competition']['level']}")
+    print(f"Keyword Difficulty: {result['competition']['keyword_difficulty']}/100")
+    print(f"Content Gaps: {', '.join(result['competition']['content_gaps'][:3])}")
+    print("---")
+```
+
 ## Output Format
 
 ### Research Summary
 
-The `generate_research_summary()` method returns a complete research summary:
+The `generate_research_summary()` method returns a complete research summary with optional competition analysis:
 
 ```json
 {
   "research_date": "2024-01-15T10:30:00.000000",
   "topic_count": 3,
   "base_topics": ["technology", "AI", "innovation"],
+  "includes_competition_analysis": true,
   "research_results": [
     {
       "topic": "The Rise of Generative AI in Enterprise",
@@ -127,6 +163,22 @@ The `generate_research_summary()` method returns a complete research summary:
       },
       "search_intent": "informational",
       "content_recommendations": "Focus on practical use cases and ROI...",
+      "competition": {
+        "level": "medium",
+        "keyword_difficulty": 55,
+        "content_saturation": "moderate",
+        "content_gaps": [
+          "practical implementation guides",
+          "industry-specific case studies",
+          "cost-benefit analysis"
+        ],
+        "differentiation_opportunities": [
+          "focus on real-world ROI examples",
+          "provide step-by-step implementation roadmaps"
+        ],
+        "recommended_focus": "Focus on practical, actionable content with real business impact",
+        "competitive_advantage": "Depth of analysis and actionable insights"
+      },
       "estimated_monthly_searches": "10k-100k",
       "discovered_at": "2024-01-15T10:30:00.000000"
     }

@@ -27,6 +27,55 @@ class TestResearchAgent(unittest.TestCase):
             self.research_agent = ResearchAgent()
     
     @patch('agents.research_agent.OpenAI')
+    def test_analyze_competition(self, mock_openai):
+        """Test competition analysis."""
+        # Mock OpenAI response
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = json.dumps({
+            "competition_level": "medium",
+            "keyword_difficulty": 55,
+            "content_saturation": "moderate",
+            "content_gaps": ["practical implementation", "case studies", "beginner guides"],
+            "differentiation_opportunities": ["focus on real examples", "actionable steps"],
+            "recommended_focus": "Focus on practical, hands-on content",
+            "competitive_advantage": "Depth and actionable insights"
+        })
+        
+        mock_client = Mock()
+        mock_client.chat.completions.create.return_value = mock_response
+        mock_openai.return_value = mock_client
+        
+        self.research_agent.client = mock_client
+        
+        competition = self.research_agent.analyze_competition(
+            "AI in Healthcare",
+            ["ai healthcare", "medical ai"]
+        )
+        
+        self.assertIn("competition_level", competition)
+        self.assertIn("keyword_difficulty", competition)
+        self.assertIn("content_gaps", competition)
+        self.assertIn("differentiation_opportunities", competition)
+        self.assertIn("recommended_focus", competition)
+        self.assertEqual(competition["competition_level"], "medium")
+        self.assertEqual(competition["keyword_difficulty"], 55)
+        mock_client.chat.completions.create.assert_called_once()
+    
+    def test_analyze_competition_fallback(self):
+        """Test fallback competition analysis when API fails."""
+        topic = "Machine Learning Applications"
+        competition = self.research_agent._generate_fallback_competition(topic)
+        
+        self.assertIn("competition_level", competition)
+        self.assertIn("keyword_difficulty", competition)
+        self.assertIn("content_gaps", competition)
+        self.assertIn("differentiation_opportunities", competition)
+        self.assertIn("recommended_focus", competition)
+        self.assertIn("competitive_advantage", competition)
+        self.assertGreater(len(competition["content_gaps"]), 0)
+    
+    @patch('agents.research_agent.OpenAI')
     def test_discover_trending_topics(self, mock_openai):
         """Test trending topic discovery."""
         # Mock OpenAI response with JSON
@@ -225,8 +274,81 @@ class TestResearchAgent(unittest.TestCase):
     
     @patch('agents.research_agent.OpenAI')
     def test_generate_research_summary(self, mock_openai):
-        """Test complete research summary generation."""
-        # Mock responses for both trending topics and SEO analysis
+        """Test complete research summary generation with competition analysis."""
+        # Mock responses for trending topics, SEO analysis, and competition
+        topic_response = Mock()
+        topic_response.choices = [Mock()]
+        topic_response.choices[0].message.content = json.dumps([
+            {
+                "topic": "AI in Healthcare",
+                "rationale": "Healthcare is being transformed by AI",
+                "trend_score": 9
+            }
+        ])
+        
+        seo_response = Mock()
+        seo_response.choices = [Mock()]
+        seo_response.choices[0].message.content = json.dumps({
+            "primary_keywords": ["AI healthcare", "medical AI"],
+            "secondary_keywords": ["diagnosis AI", "healthcare technology"],
+            "long_tail_keywords": ["AI in medical diagnosis"],
+            "search_intent": "informational",
+            "content_recommendations": "Focus on patient outcomes",
+            "estimated_monthly_searches": "10k-100k"
+        })
+        
+        competition_response = Mock()
+        competition_response.choices = [Mock()]
+        competition_response.choices[0].message.content = json.dumps({
+            "competition_level": "medium",
+            "keyword_difficulty": 55,
+            "content_saturation": "moderate",
+            "content_gaps": ["practical implementation"],
+            "differentiation_opportunities": ["focus on real examples"],
+            "recommended_focus": "Focus on practical content",
+            "competitive_advantage": "Depth and insights"
+        })
+        
+        mock_client = Mock()
+        # First call returns topics, second call returns SEO data, third call returns competition
+        mock_client.chat.completions.create.side_effect = [topic_response, seo_response, competition_response]
+        mock_openai.return_value = mock_client
+        
+        self.research_agent.client = mock_client
+        
+        summary = self.research_agent.generate_research_summary(topic_count=1, include_competition=True)
+        
+        self.assertIn("research_date", summary)
+        self.assertIn("topic_count", summary)
+        self.assertIn("base_topics", summary)
+        self.assertIn("research_results", summary)
+        self.assertIn("agent_version", summary)
+        self.assertIn("status", summary)
+        self.assertIn("includes_competition_analysis", summary)
+        
+        self.assertEqual(summary["status"], "success")
+        self.assertEqual(len(summary["research_results"]), 1)
+        self.assertTrue(summary["includes_competition_analysis"])
+        
+        result = summary["research_results"][0]
+        self.assertEqual(result["topic"], "AI in Healthcare")
+        self.assertEqual(result["trend_score"], 9)
+        self.assertIn("seo_keywords", result)
+        self.assertIn("primary", result["seo_keywords"])
+        self.assertIn("secondary", result["seo_keywords"])
+        self.assertIn("long_tail", result["seo_keywords"])
+        self.assertIn("search_intent", result)
+        self.assertIn("content_recommendations", result)
+        # Check competition data
+        self.assertIn("competition", result)
+        self.assertIn("level", result["competition"])
+        self.assertIn("keyword_difficulty", result["competition"])
+        self.assertIn("content_gaps", result["competition"])
+    
+    @patch('agents.research_agent.OpenAI')
+    def test_generate_research_summary_without_competition(self, mock_openai):
+        """Test research summary generation without competition analysis."""
+        # Mock responses
         topic_response = Mock()
         topic_response.choices = [Mock()]
         topic_response.choices[0].message.content = json.dumps([
@@ -249,33 +371,20 @@ class TestResearchAgent(unittest.TestCase):
         })
         
         mock_client = Mock()
-        # First call returns topics, second call returns SEO data
+        # Only two calls: topics and SEO (no competition)
         mock_client.chat.completions.create.side_effect = [topic_response, seo_response]
         mock_openai.return_value = mock_client
         
         self.research_agent.client = mock_client
         
-        summary = self.research_agent.generate_research_summary(topic_count=1)
-        
-        self.assertIn("research_date", summary)
-        self.assertIn("topic_count", summary)
-        self.assertIn("base_topics", summary)
-        self.assertIn("research_results", summary)
-        self.assertIn("agent_version", summary)
-        self.assertIn("status", summary)
+        summary = self.research_agent.generate_research_summary(topic_count=1, include_competition=False)
         
         self.assertEqual(summary["status"], "success")
-        self.assertEqual(len(summary["research_results"]), 1)
+        self.assertFalse(summary["includes_competition_analysis"])
         
         result = summary["research_results"][0]
-        self.assertEqual(result["topic"], "AI in Healthcare")
-        self.assertEqual(result["trend_score"], 9)
-        self.assertIn("seo_keywords", result)
-        self.assertIn("primary", result["seo_keywords"])
-        self.assertIn("secondary", result["seo_keywords"])
-        self.assertIn("long_tail", result["seo_keywords"])
-        self.assertIn("search_intent", result)
-        self.assertIn("content_recommendations", result)
+        # Should not have competition data
+        self.assertNotIn("competition", result)
     
     @patch('agents.research_agent.OpenAI')
     def test_generate_research_summary_multiple_topics(self, mock_openai):
@@ -329,12 +438,16 @@ class TestResearchAgent(unittest.TestCase):
         
         self.research_agent.client = mock_client
         
-        summary = self.research_agent.generate_research_summary(topic_count=2)
+        # Test without competition analysis
+        summary = self.research_agent.generate_research_summary(topic_count=2, include_competition=False)
         
         self.assertEqual(summary["topic_count"], 2)
         self.assertEqual(len(summary["research_results"]), 2)
         self.assertEqual(summary["research_results"][0]["topic"], "Topic 1")
         self.assertEqual(summary["research_results"][1]["topic"], "Topic 2")
+        # Should not have competition data
+        self.assertNotIn("competition", summary["research_results"][0])
+        self.assertNotIn("competition", summary["research_results"][1])
     
     @patch('agents.research_agent.OpenAI')
     def test_get_top_topic_with_seo(self, mock_openai):
