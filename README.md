@@ -324,8 +324,34 @@ For issues and questions:
 3. Open an issue on GitHub
 4. Check the documentation for troubleshooting tips
 
+## Multi-Agent Framework Evaluation
+
+We've conducted a comprehensive evaluation of CrewAI and AutoGen frameworks for implementing multi-agent content generation with SEO optimization:
+
+- **📄 Full Evaluation:** See `docs/research/crewai_vs_autogen_evaluation.md`
+- **🎯 Recommendation:** CrewAI (better for content workflows and SEO)
+- **🧪 Demo Code:** Available in `demos/` directory
+- **🔬 Comparison Results:** 30-40% cost savings with CrewAI
+
+### Quick Demo
+
+```bash
+# Test CrewAI content generation
+cd demos/crewai
+python content_seo_demo.py
+
+# Compare both frameworks
+cd demos
+python comparison_demo.py --framework both
+```
+
+See `demos/README.md` for detailed instructions.
+
 ## Roadmap
 
+- [x] Multi-agent framework evaluation (CrewAI vs AutoGen)
+- [ ] Integration with CrewAI for enhanced content generation
+- [ ] SEO agent for keyword research and optimization
 - [ ] Integration with additional AI models
 - [ ] Support for more content types (podcasts, newsletters)
 - [ ] Advanced analytics and performance tracking
