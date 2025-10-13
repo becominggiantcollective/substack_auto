@@ -18,6 +18,10 @@ from content_generators.image_generator import ImageGenerator
 from content_generators.video_generator import VideoGenerator
 from publishers.substack_publisher import SubstackPublisher
 from agents.fact_checker_agent import FactCheckerAgent
+from agents.analytics_agent import AnalyticsAgent
+from agents.performance_predictor import PerformancePredictorAgent
+from agents.topic_trending import TopicTrendingAgent
+from agents.ab_testing import ABTestingFramework
 from config.settings import settings
 
 # Set up logging
@@ -43,6 +47,10 @@ class ContentOrchestrator:
         self.video_generator = VideoGenerator()
         self.publisher = SubstackPublisher()
         self.fact_checker = FactCheckerAgent()
+        self.analytics = AnalyticsAgent(settings.output_dir)
+        self.predictor = PerformancePredictorAgent()
+        self.trending = TopicTrendingAgent()
+        self.ab_testing = ABTestingFramework(settings.output_dir)
         
         # Ensure output directory exists
         os.makedirs(settings.output_dir, exist_ok=True)
@@ -263,6 +271,9 @@ class ContentOrchestrator:
         try:
             pub_stats = self.publisher.get_publication_stats()
             
+            # Get analytics insights
+            insights = self.analytics.generate_insights()
+            
             return {
                 "posts_today": self.posts_today,
                 "max_posts_per_day": settings.max_posts_per_day,
@@ -271,6 +282,8 @@ class ContentOrchestrator:
                 "output_directory": settings.output_dir,
                 "configured_topics": settings.topics_list,
                 "scheduler_active": len(schedule.jobs) > 0,
+                "performance_summary": insights.get("summary", {}),
+                "active_ab_tests": len(self.ab_testing.list_active_tests()),
                 "system_status": "operational"
             }
             
@@ -280,6 +293,102 @@ class ContentOrchestrator:
                 "system_status": "error",
                 "error": str(e)
             }
+    
+    def get_analytics_dashboard(self) -> Dict[str, any]:
+        """Get comprehensive analytics dashboard.
+        
+        Returns:
+            Dashboard data with metrics and insights
+        """
+        try:
+            dashboard = self.analytics.get_dashboard_data()
+            logger.info("Retrieved analytics dashboard")
+            return dashboard
+        except Exception as e:
+            logger.error(f"Error getting analytics dashboard: {e}")
+            return {"error": str(e)}
+    
+    def predict_content_performance(self, post_data: Dict) -> Dict[str, any]:
+        """Predict performance of content before publishing.
+        
+        Args:
+            post_data: Post data to analyze
+        
+        Returns:
+            Performance prediction
+        """
+        try:
+            prediction = self.predictor.predict_performance(post_data)
+            logger.info(f"Predicted performance: {prediction.get('overall_score', 0):.2f}")
+            return prediction
+        except Exception as e:
+            logger.error(f"Error predicting performance: {e}")
+            return {"error": str(e)}
+    
+    def suggest_trending_topics(self, count: int = 5) -> List[Dict]:
+        """Get trending topic suggestions.
+        
+        Args:
+            count: Number of topics to suggest
+        
+        Returns:
+            List of topic suggestions
+        """
+        try:
+            suggestions = self.trending.suggest_content_topics(count)
+            logger.info(f"Retrieved {len(suggestions)} trending topic suggestions")
+            return suggestions
+        except Exception as e:
+            logger.error(f"Error getting topic suggestions: {e}")
+            return []
+    
+    def create_ab_test(self, test_name: str, variations: List[Dict], test_type: str = "title") -> Dict[str, any]:
+        """Create a new A/B test.
+        
+        Args:
+            test_name: Name for the test
+            variations: List of variations to test
+            test_type: Type of test (title, subtitle, content_style, full_post)
+        
+        Returns:
+            Test configuration
+        """
+        try:
+            test = self.ab_testing.create_test(test_name, variations, test_type)
+            logger.info(f"Created A/B test: {test_name}")
+            return test
+        except Exception as e:
+            logger.error(f"Error creating A/B test: {e}")
+            return {"error": str(e)}
+    
+    def generate_with_prediction(self) -> Dict[str, any]:
+        """Generate content with performance prediction.
+        
+        Returns:
+            Content with prediction data
+        """
+        try:
+            logger.info("Generating content with performance prediction...")
+            
+            # Generate content
+            content = self.generate_complete_content()
+            
+            # Predict performance
+            prediction = self.predictor.predict_performance(content["post_data"])
+            content["performance_prediction"] = prediction
+            
+            # Log prediction
+            overall_score = prediction.get("overall_score", 0)
+            logger.info(f"Performance prediction: {overall_score:.2f}")
+            
+            if overall_score < 0.5:
+                logger.warning("Low predicted performance - consider regenerating")
+            
+            return content
+            
+        except Exception as e:
+            logger.error(f"Error in generate_with_prediction: {e}")
+            raise
 
 
 def main():

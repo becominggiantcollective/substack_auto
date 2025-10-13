@@ -45,4 +45,32 @@ class BaseAgent:
         return isinstance(content, dict)
 
 
-__all__ = ["BaseAgent"]
+# Import agents only when accessed to avoid settings import at module level
+def __getattr__(name):
+    """Lazy import of agents."""
+    if name == "FactCheckerAgent":
+        from .fact_checker_agent import FactCheckerAgent
+        return FactCheckerAgent
+    elif name == "AnalyticsAgent":
+        from .analytics_agent import AnalyticsAgent
+        return AnalyticsAgent
+    elif name == "PerformancePredictorAgent":
+        from .performance_predictor import PerformancePredictorAgent
+        return PerformancePredictorAgent
+    elif name == "TopicTrendingAgent":
+        from .topic_trending import TopicTrendingAgent
+        return TopicTrendingAgent
+    elif name == "ABTestingFramework":
+        from .ab_testing import ABTestingFramework
+        return ABTestingFramework
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+__all__ = [
+    "BaseAgent",
+    "FactCheckerAgent",
+    "AnalyticsAgent",
+    "PerformancePredictorAgent",
+    "TopicTrendingAgent",
+    "ABTestingFramework"
+]

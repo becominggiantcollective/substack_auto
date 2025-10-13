@@ -86,6 +86,11 @@ def run_demo():
     print("🎬 Running Substack Auto Demo...")
     os.system(f"{sys.executable} demo.py")
 
+def run_innovative_demo():
+    """Run the innovative features demonstration."""
+    print("🚀 Running Innovative Features Demo...")
+    os.system(f"{sys.executable} demo_innovative_features.py")
+
 def generate_single_post():
     """Generate a single post."""
     if not check_environment():
@@ -141,6 +146,140 @@ def show_status():
     except Exception as e:
         print(f"❌ Error getting status: {e}")
 
+def show_analytics():
+    """Show analytics dashboard."""
+    if not check_environment():
+        return
+    
+    try:
+        from main import ContentOrchestrator
+        orchestrator = ContentOrchestrator()
+        dashboard = orchestrator.get_analytics_dashboard()
+        
+        print("📊 Analytics Dashboard")
+        print("=" * 50)
+        
+        # Quick stats
+        quick_stats = dashboard.get("quick_stats", {})
+        print("\n📈 Quick Stats:")
+        print(f"  • Total Posts: {quick_stats.get('total_posts', 0)}")
+        print(f"  • Avg Word Count: {quick_stats.get('avg_word_count', 0):.0f}")
+        print(f"  • Avg Fact Check: {quick_stats.get('avg_fact_score', 0):.2f}")
+        print(f"  • Avg SEO Score: {quick_stats.get('avg_seo_score', 0):.2f}")
+        print(f"  • Overall Performance: {quick_stats.get('overall_performance', 0):.2f}")
+        
+        # Insights
+        insights = dashboard.get("insights", {})
+        recommendations = insights.get("recommendations", [])
+        if recommendations:
+            print(f"\n💡 Top Recommendations:")
+            for i, rec in enumerate(recommendations[:3], 1):
+                print(f"  {i}. [{rec.get('priority', 'medium')}] {rec.get('message', '')}")
+        
+        alerts = insights.get("alerts", [])
+        if alerts:
+            print(f"\n⚠️  Alerts:")
+            for alert in alerts:
+                print(f"  • {alert.get('message', '')}")
+        
+        print("\n✅ Full dashboard exported to analytics_report.json")
+        
+        # Export full report
+        orchestrator.analytics.export_report()
+        
+    except Exception as e:
+        print(f"❌ Error getting analytics: {e}")
+
+def predict_performance():
+    """Predict content performance."""
+    if not check_environment():
+        return
+    
+    print("🔮 Content Performance Predictor")
+    print("=" * 50)
+    
+    try:
+        from main import ContentOrchestrator
+        orchestrator = ContentOrchestrator()
+        
+        # Generate content with prediction
+        print("\nGenerating content with performance prediction...")
+        content = orchestrator.generate_with_prediction()
+        
+        prediction = content.get("performance_prediction", {})
+        
+        print(f"\n📊 Performance Prediction:")
+        print(f"  • Overall Score: {prediction.get('overall_score', 0):.2f}/1.0")
+        
+        overall = prediction.get("overall_prediction", {})
+        print(f"  • Success Probability: {overall.get('success_probability', 0):.2f}")
+        print(f"  • Expected Audience: {overall.get('expected_audience_size', 'unknown')}")
+        
+        recommendations = prediction.get("recommendations", {})
+        improvements = recommendations.get("improvements", [])
+        if improvements:
+            print(f"\n✅ Suggested Improvements:")
+            for i, improvement in enumerate(improvements[:3], 1):
+                print(f"  {i}. {improvement}")
+        
+    except Exception as e:
+        print(f"❌ Error predicting performance: {e}")
+
+def get_trending_topics():
+    """Get trending topic suggestions."""
+    if not check_environment():
+        return
+    
+    print("🔥 Trending Topics")
+    print("=" * 50)
+    
+    try:
+        from main import ContentOrchestrator
+        orchestrator = ContentOrchestrator()
+        
+        print("\nAnalyzing trending topics...")
+        suggestions = orchestrator.suggest_trending_topics(count=5)
+        
+        print(f"\n💡 Content Suggestions ({len(suggestions)}):")
+        for i, suggestion in enumerate(suggestions, 1):
+            print(f"\n{i}. {suggestion.get('title_suggestion', 'Unknown')}")
+            print(f"   Priority: {suggestion.get('priority', 'medium').upper()}")
+            print(f"   Topic: {suggestion.get('topic', 'N/A')}")
+            print(f"   Relevance: {suggestion.get('relevance_score', 0):.2f}")
+        
+    except Exception as e:
+        print(f"❌ Error getting trending topics: {e}")
+
+def manage_ab_tests():
+    """Manage A/B tests."""
+    if not check_environment():
+        return
+    
+    print("🧪 A/B Testing Management")
+    print("=" * 50)
+    
+    try:
+        from main import ContentOrchestrator
+        orchestrator = ContentOrchestrator()
+        
+        # List active tests
+        active_tests = orchestrator.ab_testing.list_active_tests()
+        
+        print(f"\n📋 Active Tests ({len(active_tests)}):")
+        for i, test in enumerate(active_tests, 1):
+            print(f"\n{i}. {test['test_name']}")
+            print(f"   ID: {test['test_id']}")
+            print(f"   Type: {test['test_type']}")
+            print(f"   Variations: {test['variations_count']}")
+            print(f"   Created: {test['created_at']}")
+        
+        if not active_tests:
+            print("  No active tests")
+            print("\n💡 Create a test with orchestrator.create_ab_test() in Python")
+        
+    except Exception as e:
+        print(f"❌ Error managing A/B tests: {e}")
+
 def main():
     """Main CLI interface."""
     parser = argparse.ArgumentParser(
@@ -150,14 +289,20 @@ def main():
 Examples:
   %(prog)s setup          # Run setup wizard
   %(prog)s demo           # Run demonstration
+  %(prog)s innovative     # Run innovative features demo
   %(prog)s generate       # Generate one post
   %(prog)s schedule       # Start automated scheduler
   %(prog)s status         # Show system status
+  %(prog)s analytics      # View analytics dashboard
+  %(prog)s predict        # Predict content performance
+  %(prog)s trends         # Get trending topics
+  %(prog)s abtest         # Manage A/B tests
         """
     )
     
     parser.add_argument('command', 
-                       choices=['setup', 'demo', 'generate', 'schedule', 'status'],
+                       choices=['setup', 'demo', 'innovative', 'generate', 'schedule', 
+                               'status', 'analytics', 'predict', 'trends', 'abtest'],
                        help='Command to execute')
     
     if len(sys.argv) == 1:
@@ -173,12 +318,22 @@ Examples:
         setup_wizard()
     elif args.command == 'demo':
         run_demo()
+    elif args.command == 'innovative':
+        run_innovative_demo()
     elif args.command == 'generate':
         generate_single_post()
     elif args.command == 'schedule':
         start_scheduler()
     elif args.command == 'status':
         show_status()
+    elif args.command == 'analytics':
+        show_analytics()
+    elif args.command == 'predict':
+        predict_performance()
+    elif args.command == 'trends':
+        get_trending_topics()
+    elif args.command == 'abtest':
+        manage_ab_tests()
 
 if __name__ == "__main__":
     main()
