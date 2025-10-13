@@ -45,4 +45,18 @@ class BaseAgent:
         return isinstance(content, dict)
 
 
-__all__ = ["BaseAgent"]
+from .fact_checker_agent import FactCheckerAgent
+from .analytics_agent import AnalyticsAgent
+from .performance_predictor import PerformancePredictorAgent
+from .topic_trending import TopicTrendingAgent
+from .ab_testing import ABTestingFramework
+
+
+__all__ = [
+    "BaseAgent",
+    "FactCheckerAgent",
+    "AnalyticsAgent",
+    "PerformancePredictorAgent",
+    "TopicTrendingAgent",
+    "ABTestingFramework"
+]
