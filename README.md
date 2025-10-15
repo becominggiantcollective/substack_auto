@@ -324,8 +324,26 @@ For issues and questions:
 3. Open an issue on GitHub
 4. Check the documentation for troubleshooting tips
 
+## Research & Documentation
+
+Technical research and decision documentation:
+
+- **[Multi-Agent Framework Evaluation](docs/research/)** - CrewAI vs AutoGen comparison
+  - Comprehensive analysis of both frameworks
+  - SEO optimization capabilities comparison
+  - Cost analysis and recommendations
+  - **Decision**: CrewAI recommended for implementation
+  - **Demo Code**: See `examples/crewai_demo.py`
+
 ## Roadmap
 
+- [x] **Multi-Agent System Research** - Evaluated CrewAI vs AutoGen (October 2025)
+  - Decision: CrewAI recommended for multi-agent content generation
+  - See [Research Documentation](docs/research/) for details
+- [ ] **Multi-Agent Content Generation** - Implement CrewAI-based system (Q4 2025)
+  - 4-agent crew: Research, SEO, Writer, Editor
+  - Enhanced SEO optimization capabilities
+  - Improved content quality through collaboration
 - [ ] Integration with additional AI models
 - [ ] Support for more content types (podcasts, newsletters)
 - [ ] Advanced analytics and performance tracking
